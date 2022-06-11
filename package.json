@@ -1,0 +1,70 @@
+{
+	"name": "rank-verification",
+	"version": "2.0.0",
+	"description": "OCE.gg Rank Verification bot",
+	"author": "OCE.gg",
+	"main": "./dist/RankVerify.js",
+	"imports": {
+		"#helpers/*": "./dist/helpers/*.js",
+		"#root/*": "./dist/*.js",
+		"#utils/*": "./dist/helpers/utils/*.js",
+		"#utils/common": "./dist/helpers/utils/common/index.js"
+	},
+	"scripts": {
+		"build": "tsc -b src",
+		"dev": "yarn build && yarn start",
+		"start": "node dist/RankVerify.js",
+		"lint": "eslint --fix --ext ts src",
+		"format": "prettier --write --loglevel=warn \"{src,tests}/**/*.{js,ts,json}\"",
+		"update": "yarn upgrade-interactive"
+	},
+	"dependencies": {
+		"@sapphire/decorators": "^4.3.4",
+		"@sapphire/framework": "^3.0.0-next.210481a.0",
+		"cassandra-driver": "^4.6.3",
+		"discord.js": "^13.7.0",
+		"dotenv": "^16.0.0",
+		"yarn": "^1.22.19"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^16.2.4",
+		"@commitlint/config-conventional": "^16.2.4",
+		"@sapphire/eslint-config": "^4.3.4",
+		"@sapphire/prettier-config": "^1.4.3",
+		"@sapphire/ts-config": "^3.3.4",
+		"@typescript-eslint/parser": "^5.22.0",
+		"cz-conventional-changelog": "^3.3.0",
+		"eslint": "^8.15.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"husky": "^8.0.1",
+		"lint-staged": "^12.4.1",
+		"prettier": "^2.6.2",
+		"pretty-quick": "^3.1.3",
+		"typescript": "^4.6.4"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oce-gg/rank-verification.git"
+	},
+	"commitlint": {
+		"extends": [
+			"@commitlint/config-conventional"
+		]
+	},
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	},
+	"prettier": "@sapphire/prettier-config",
+	"license": "MIT",
+	"engines": {
+		"node": "^16",
+		"npm": "^7"
+	},
+	"lint-staged": {
+		"*.{mjs,js,ts}": "eslint --fix --ext mjs,js,ts"
+	},
+	"packageManager": "yarn@3.2.0"
+}
