@@ -1,0 +1,39 @@
+{
+    "guilds": [
+        {
+            "id": "767649315757752331",
+            "verify_target": "986887174538551326",
+            "verify_queue": "986888050724458536",
+            "verify_log": "986933045225455637",
+            "quickdeny": [
+                {
+                    "id": "cropped",
+                    "name": "Image cropped",
+                    "reply": "Your image appears to be cropped. Please resubmit a full-screen version"
+                },
+                {
+                    "id": "screenshot",
+                    "name": "Not screenshot",
+                    "reply": "Hey! You need to use the Windows screenshot tool (Win + PrtSc) and submit that to be accepted..."
+                },
+                {
+                    "id": "tag_not_visible",
+                    "name": "No tag (Platinum+)",
+                    "reply": "Please re-submit this screenshot with your in-game tag visible. (Hover over your name)"
+                },
+                {
+                    "id": "no_rank",
+                    "name": "No rank",
+                    "reply": "Looks like you don't have a rank yet, feel free to submit again once you are ranked."
+                },
+                {
+                    "id": "not_oce",
+                    "name": "Other region",
+                    "reply": "Hmm... I don't think you are from Oceania. Are you sure you are in the right place?"
+                }
+            ],
+            "ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Immortal", "Radiant"],
+            "rankcap": 4
+        }
+    ]
+}
