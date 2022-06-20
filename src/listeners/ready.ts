@@ -15,11 +15,22 @@ export default class UserListener extends Listener {
 
 		await client.guilds.fetch();
 
+		client.user?.setPresence({
+			status: 'dnd',
+			activities: [
+				{
+					name: 'for your rank submissions!',
+					type: 'WATCHING'
+				}
+			]
+		});
+
 		vClient.config.guilds.forEach(async (guildConfig) => {
 			const guild = client.guilds.cache.get(guildConfig.id) as Guild;
 			const channel = (await guild.channels.fetch(guildConfig.verify_target)) as TextChannel;
 			if (channel) {
 				const messages = (await channel.messages.fetch({ limit: 100 })).filter((message) => !message.author.bot);
+				console.log(`Found ${messages.size} messages in ${channel.toString()}`);
 				messages.forEach(client.verificationManager.handleVerificationMessage);
 			}
 		});

@@ -1,10 +1,13 @@
-import { GuildMember, Message, MessageActionRow, MessageEmbed, MessageSelectMenu, TextChannel } from 'discord.js';
+import { GuildMember, Message, MessageActionRow, MessageAttachment, MessageEmbed, MessageSelectMenu, Role, TextChannel } from 'discord.js';
 import type { GuildConfig } from '#helpers/interfaces/Config';
-import { BrandColors } from '#utils/constants';
+import { BrandColors, Colors } from '#utils/constants';
 import { client } from '#root/RankVerify';
+import fetch from 'node-fetch';
 import fs from 'fs';
+import axios from 'axios';
 import type VerificationResponse from '#helpers/interfaces/VerificationResponse';
 import type AccountAssociation from '#helpers/interfaces/AccountAssociation';
+import resolveTag from '#utils/valorantTagResolver';
 
 export default class VerificationManager {
 	private previouslyVerified: AccountAssociation[];
@@ -17,7 +20,7 @@ export default class VerificationManager {
 		member: GuildMember,
 		rank: string,
 		account: VerificationResponse
-	): Promise<{ error?: string; message?: string; success?: boolean }> {
+	): Promise<{ error?: string; message?: string; success?: boolean; role?: Role }> {
 		await member.guild.roles.fetch();
 		const role = member.guild.roles.cache.find((r) => r.name.toLowerCase() === rank.split(' ')[0].toLowerCase());
 
@@ -37,12 +40,105 @@ export default class VerificationManager {
 				puuid: account.puuid
 			});
 			fs.writeFileSync('./verifications.json', JSON.stringify(this.previouslyVerified));
-			return { success: true };
+
+			return { success: true, role };
 		}
 		return {
 			error: 'invalid-role',
 			message: `The server admins have not configured that rank yet, have an admin configure \`${rank.split(' ')[0].toLowerCase()}\`!`
 		};
+	}
+
+	public async logVerificationFailure(member: GuildMember, reason: string, image: Buffer, staff: GuildMember) {
+		const guild: GuildConfig = client.config.guilds.find((g) => g.id === member.guild.id) as GuildConfig;
+		const targetChannel = (await client.channels.fetch(guild.verify_log)) as TextChannel;
+
+		const attachment = new MessageAttachment(image, 'verification.png');
+
+		const embed = new MessageEmbed()
+			.setColor(Colors.Red)
+			.setTitle('Verification Rejected')
+			.setDescription(`${member.user} has failed verification for the reason: \`\`\`\n${reason}\`\`\``)
+			.addField('Denied by', `${staff.user}`)
+			.setImage('attachment://verification.png')
+			.setTimestamp();
+
+		await targetChannel.send({ embeds: [embed], files: [attachment] });
+	}
+
+	public async logVerificationSuccess(member: GuildMember, rank: string, image: Buffer, staff: GuildMember) {
+		const guild: GuildConfig = client.config.guilds.find((g) => g.id === member.guild.id) as GuildConfig;
+		const targetChannel = (await client.channels.fetch(guild.verify_log)) as TextChannel;
+
+		const attachment = new MessageAttachment(image, 'verification.png');
+
+		const embed = new MessageEmbed()
+			.setColor(Colors.LightGreen)
+			.setTitle('Verification Accepted')
+			.setDescription(`${member.user} has been verified for the rank ${rank}`)
+			.addField('Rank', `${rank}`)
+			.addField('Verified by', `${staff.user}`)
+			.setImage(attachment.url)
+			.setTimestamp();
+
+		await targetChannel.send({ embeds: [embed], files: [attachment] });
+	}
+
+	public async locateExistingVerification(member: GuildMember): Promise<Message<boolean> | undefined> {
+		const guild: GuildConfig = client.config.guilds.find((g) => g.id === member.guild.id) as GuildConfig;
+		const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
+		const messages = await targetChannel.messages.fetch({ limit: 100 });
+		const message = messages
+			.filter((m) => m.embeds.length > 0 && m.embeds[0].footer !== null)
+			.filter((m) => m.embeds[0].footer!.text === member.user.id);
+
+		return message.size > 0 ? message.first() : undefined;
+	}
+
+	public async lookupUser(username: string, tagline: string) {
+		let account = await (
+			await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}`, {
+				headers: {
+					accept: '*/*',
+					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
+					'cache-control': 'no-cache',
+					pragma: 'no-cache',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+					'sec-gpc': '1',
+					'Referrer-Policy': 'strict-origin-when-cross-origin'
+				},
+				method: 'GET'
+			})
+		).json();
+
+		account = account.data;
+
+		if (!account) return { success: false, message: 'No account found' };
+
+		if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
+
+		let rank = await (
+			await fetch(`https://api.henrikdev.xyz/valorant/v2/by-puuid/mmr/ap/${account.puuid}`, {
+				headers: {
+					accept: '*/*',
+					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
+					'cache-control': 'no-cache',
+					pragma: 'no-cache',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+					'sec-gpc': '1',
+					'Referrer-Policy': 'strict-origin-when-cross-origin'
+				},
+				method: 'GET'
+			})
+		).json();
+
+		rank = rank.data;
+
+		return { success: true, data: { account, rank } };
 	}
 
 	public async handleVerificationMessage(message: Message) {
@@ -73,8 +169,30 @@ export default class VerificationManager {
 			}
 
 			if (imageUrl) {
+				const image = await VerificationManager.downloadImage(imageUrl);
+
+				void message.delete();
 				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
 				if (!message.member) return;
+
+				const existingVerification = await this.locateExistingVerification(message.member);
+
+				if (existingVerification) {
+					const attachment = new MessageAttachment(image, 'verify.png');
+					void existingVerification.edit({ files: [attachment] });
+
+					void message.channel
+						.send({
+							content: `Hey ${message.author.toString()}! \nI have updated your existing verification to show this new image!`
+						})
+						.then((message) => {
+							setTimeout(() => message.delete(), 5000);
+						});
+					return;
+				}
+
+				const valorantUsername = await resolveTag(image);
+
 				const currentRank = message.member.roles.cache.find((role) => guild.ranknames.includes(role.name));
 
 				const embed = new MessageEmbed();
@@ -84,9 +202,9 @@ export default class VerificationManager {
 				});
 				embed.setDescription(`${message.author.tag} has requested verification.`);
 				embed.addField('Mention', message.author.toString(), true);
+				embed.addField('Username', valorantUsername.parts?.join('#') ?? 'Unknown', true);
 				if (currentRank) embed.addField('Current Rank', currentRank.toString(), true);
 				embed.setColor(BrandColors.Primary);
-				embed.setThumbnail(imageUrl);
 				embed.setFooter({ text: message.author.id });
 				embed.setTimestamp(new Date());
 
@@ -112,13 +230,30 @@ export default class VerificationManager {
 
 				rank.addOptions(guild.ranknames.slice(0, guild.rankcap).map((r) => ({ label: r, value: r })));
 
+				rank.addOptions([
+					{
+						label: 'Higher rank',
+						value: 'higher'
+					}
+				]);
+
 				quickDenyRow.addComponents(quickDeny);
 				rankVerifyRow.addComponents(rank);
 
-				await targetChannel.send({ embeds: [embed], components: [quickDenyRow, rankVerifyRow] });
-				void message.delete();
+				const attachment = new MessageAttachment(image, 'verify.png');
+
+				embed.setImage('attachment://verify.png');
+
+				await targetChannel.send({ embeds: [embed], components: [quickDenyRow, rankVerifyRow], files: [attachment] });
+
+				void message.channel
+					.send({
+						content: `Hey ${message.author.toString()}! \nWe are now processing your verification, this may take a few hours :)`
+					})
+					.then((message) => {
+						setTimeout(() => message.delete(), 10000);
+					});
 			} else {
-				void message.delete();
 				void message.author
 					.createDM()
 					.then((dm) => {
@@ -143,5 +278,10 @@ export default class VerificationManager {
 					});
 			}
 		}
+	}
+
+	public static async downloadImage(image: string) {
+		const imageData = await axios.get(image, { responseType: 'arraybuffer' });
+		return Buffer.from(imageData.data);
 	}
 }

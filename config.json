@@ -1,11 +1,17 @@
 {
     "guilds": [
         {
-            "id": "767649315757752331",
-            "verify_target": "986887174538551326",
-            "verify_queue": "986888050724458536",
-            "verify_log": "986933045225455637",
+            "id": "537887361292304385",
+            "verify_target": "987664218809585674",
+            "verify_queue": "987683130808889454",
+            "verify_log": "818856612914790410",
+            "verify_log_public": "987679530745466890",
             "quickdeny": [
+                {
+                    "id": "general",
+                    "name": "Denied",
+                    "reply": "Hmm... Something isn't right with this verification. Please try again later."
+                },
                 {
                     "id": "cropped",
                     "name": "Image cropped",
@@ -32,7 +38,7 @@
                     "reply": "Hmm... I don't think you are from Oceania. Are you sure you are in the right place?"
                 }
             ],
-            "ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Immortal", "Radiant"],
+            "ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
             "rankcap": 4
         }
     ]
