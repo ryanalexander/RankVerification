@@ -41,14 +41,18 @@ export default class UserListener extends Listener {
 						interaction.member
 					);
 
-					target
-						.createDM()
-						.then((dm) => {
-							dm.send(
-								`Your rank verify has been denied, see below for the reason: \n${messages.map((message) => `- ${message.reply}\n`)}`
-							).catch();
-						})
-						.catch();
+					try {
+						target
+							.createDM()
+							.then((dm) => {
+								dm.send(
+									`Your rank verify has been denied, see below for the reason: \n${messages.map(
+										(message) => `- ${message.reply}\n`
+									)}`
+								).catch();
+							})
+							.catch();
+					} catch (e) {}
 				}
 			} else if (interaction.customId === 'rank' && interaction.values[0] !== 'higher') {
 				const guild: GuildConfig | undefined = client.config.guilds.find((g) => g.verify_queue === interaction.channel!.id);
