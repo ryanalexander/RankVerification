@@ -26,15 +26,7 @@ export default class UserListener extends Listener {
 					const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text);
 
 					const messages = guild.quickdeny.filter((q) => interaction.values.includes(q.id));
-
-					target
-						.createDM()
-						.then((dm) => {
-							dm.send(
-								`Your rank verify has been denied, see below for the reason: \n${messages.map((message) => `- ${message.reply}\n`)}`
-							).catch();
-						})
-						.catch();
+					void interaction.message.delete();
 
 					void logChannel.send({
 						content: `Hey ${target.user.toString()}! Your rank verify has been denied, see below for the reason: \n${messages.map(
@@ -49,7 +41,14 @@ export default class UserListener extends Listener {
 						interaction.member
 					);
 
-					void interaction.message.delete();
+					target
+						.createDM()
+						.then((dm) => {
+							dm.send(
+								`Your rank verify has been denied, see below for the reason: \n${messages.map((message) => `- ${message.reply}\n`)}`
+							).catch();
+						})
+						.catch();
 				}
 			} else if (interaction.customId === 'rank' && interaction.values[0] !== 'higher') {
 				const guild: GuildConfig | undefined = client.config.guilds.find((g) => g.verify_queue === interaction.channel!.id);
