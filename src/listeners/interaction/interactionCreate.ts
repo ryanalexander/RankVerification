@@ -29,9 +29,9 @@ export default class UserListener extends Listener {
 					void interaction.message.delete();
 
 					void logChannel.send({
-						content: `Hey ${target.user.toString()}! Your rank verify has been denied, see below for the reason: \n${messages.map(
-							(message) => `- ${message.reply}\n`
-						)}`
+						content: `Hey ${target.user.toString()}! Your rank verify has been denied, see below for the reason: \n${messages
+							.map((message) => `- ${message.reply}`)
+							.join('\n')}`
 					});
 
 					void client.verificationManager.logVerificationFailure(
