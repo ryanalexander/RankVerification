@@ -80,7 +80,7 @@ export default class VerificationManager {
 			.setDescription(`${member.user} has been verified for the rank ${rank}`)
 			.addField('Rank', `${rank}`)
 			.addField('Verified by', `${staff.user}`)
-			.setImage(attachment.url)
+			.setImage('attachment://verification.png')
 			.setTimestamp();
 
 		await targetChannel.send({ embeds: [embed], files: [attachment] });
