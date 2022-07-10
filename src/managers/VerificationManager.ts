@@ -173,7 +173,7 @@ export default class VerificationManager {
 			if (imageUrl) {
 				const image = await VerificationManager.downloadImage(imageUrl);
 
-				void message.delete();
+				void message.delete().catch(console.log);
 				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
 				if (!message.member) return;
 
@@ -188,7 +188,7 @@ export default class VerificationManager {
 							content: `Hey ${message.author.toString()}! \nI have updated your existing verification to show this new image!`
 						})
 						.then((message) => {
-							setTimeout(() => message.delete(), 5000);
+							setTimeout(() => message.delete().catch(console.log), 5000);
 						});
 					return;
 				}
@@ -253,7 +253,7 @@ export default class VerificationManager {
 						content: `Hey ${message.author.toString()}! \nWe are now processing your verification, this may take a few hours :)`
 					})
 					.then((message) => {
-						setTimeout(() => message.delete(), 10000);
+						setTimeout(() => message.delete().catch(console.log), 10000);
 					});
 			} else {
 				void message.author
@@ -265,7 +265,7 @@ export default class VerificationManager {
 									content: `Hey ${message.author.toString()}, you must include an image in your message to verify.`
 								})
 								.then((message) => {
-									setTimeout(() => message.delete(), 5000);
+									setTimeout(() => message.delete().catch(console.log), 5000);
 								});
 						});
 					})
@@ -275,7 +275,7 @@ export default class VerificationManager {
 								content: `Hey ${message.author.toString()}, you must include an image in your message to verify.`
 							})
 							.then((message) => {
-								setTimeout(() => message.delete(), 5000);
+								setTimeout(() => message.delete().catch(console.log), 5000);
 							});
 					});
 			}

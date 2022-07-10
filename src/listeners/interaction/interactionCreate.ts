@@ -25,8 +25,14 @@ export default class UserListener extends Listener {
 					const logChannel = (await client.guilds.cache.get(guild.id)!.channels.fetch(guild.verify_log_public)) as unknown as ThreadChannel;
 					const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text);
 
+					if (!target) {
+						await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
+						void interaction.message.delete().catch(console.log);
+						return;
+					}
+
 					const messages = guild.quickdeny.filter((q) => interaction.values.includes(q.id));
-					void interaction.message.delete();
+					void interaction.message.delete().catch(console.log);
 
 					void logChannel.send({
 						content: `Hey ${target.user.toString()}! Your rank verify has been denied, see below for the reason: \n${messages
@@ -59,6 +65,12 @@ export default class UserListener extends Listener {
 				if (!guild) return;
 				const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text);
 
+				if (!target) {
+					await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
+					void interaction.message.delete().catch(console.log);
+					return;
+				}
+
 				const rank = interaction.guild.roles.cache.find((role) => role.name === interaction.values[0]);
 
 				if (!rank) return;
@@ -72,7 +84,7 @@ export default class UserListener extends Listener {
 					interaction.member
 				);
 
-				void interaction.message.delete();
+				void interaction.message.delete().catch(console.log);
 			} else if (interaction.customId === 'rank' && interaction.values[0] === 'higher') {
 				const modal = new Modal().setCustomId(`higher-${interaction.message.id}`).setTitle('uwu rank me please');
 
@@ -120,6 +132,13 @@ export default class UserListener extends Listener {
 				}
 
 				const target = await client.guilds.cache.get(guild.id)!.members.fetch(verifyMessage.embeds[0].footer!.text);
+
+				if (!target) {
+					await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
+					void verifyMessage.delete().catch(console.log);
+					return;
+				}
+
 				const rank = account.data!.rank.current_data.currenttierpatched.split(' ')[0];
 
 				if (!rank) {
@@ -145,7 +164,7 @@ export default class UserListener extends Listener {
 				);
 
 				void interaction.editReply({ content: `${target.user.toString()} has been verified as ${response.role}` });
-				void verifyMessage.delete();
+				void verifyMessage.delete().catch(console.log);
 			}
 		}
 
