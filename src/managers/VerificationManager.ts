@@ -34,8 +34,6 @@ export default class VerificationManager {
 		}
 
 		if (role) {
-			if (['diamond', 'immortal', 'ascendant', 'radiant'].includes(role?.name.toLowerCase()))
-				return { error: 'too high', message: `You cannot verify members above Platinum yet! (Member is ${role?.name.toLowerCase()})` };
 			await member.roles.add(role);
 			this.previouslyVerified.push({
 				discord_id: member.user.id,
