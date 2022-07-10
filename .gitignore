@@ -1,3 +1,9 @@
+# Temp/Working directories
+tmp/
+
+# Yarn
+yarn.lock
+
 # API keys and secrets
 .env
 
