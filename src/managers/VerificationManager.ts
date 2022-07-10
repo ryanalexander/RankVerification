@@ -13,7 +13,7 @@ export default class VerificationManager {
 	private previouslyVerified: AccountAssociation[];
 
 	public constructor() {
-		this.previouslyVerified = JSON.parse(fs.readFileSync('./verifications.json').toString());
+		this.previouslyVerified = JSON.parse(fs.readFileSync('./data/verifications.json').toString());
 	}
 
 	public async verifyUser(
@@ -41,7 +41,7 @@ export default class VerificationManager {
 				discord_id: member.user.id,
 				puuid: account.puuid
 			});
-			fs.writeFileSync('./verifications.json', JSON.stringify(this.previouslyVerified));
+			fs.writeFileSync('./data/verifications.json', JSON.stringify(this.previouslyVerified));
 
 			return { success: true, role };
 		}
