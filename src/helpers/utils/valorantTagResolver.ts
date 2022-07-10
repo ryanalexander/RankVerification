@@ -1,5 +1,6 @@
 import { createCanvas, loadImage } from 'canvas';
-import { createWorker } from 'tesseract.js';
+import Tesseract from 'tesseract.js';
+import { default as fs } from 'fs';
 
 export default async function resolveTag(img: Buffer) {
 	const image = await loadImage(img);
@@ -138,19 +139,16 @@ export default async function resolveTag(img: Buffer) {
 		}
 	}
 
-	const worker = createWorker({});
+	const name = `./tmp/filtered-${new Date().getTime()}.png`;
+	fs.writeFileSync(name, filteredCanvas.toBuffer());
 
-	await worker.load();
-	await worker.loadLanguage('eng');
-	await worker.initialize('eng');
 	const {
 		data: { text }
-	} = await worker.recognize(filteredCanvas.toDataURL());
+	} = await Tesseract.recognize(filteredCanvas.toDataURL(), 'eng');
 	const parts = text.replace('#', '').split('\n')[0].split(' ');
 	if (parts.length < 2) {
 		return { success: false, error: true, message: 'Final call returned no results' };
 	}
-	await worker.terminate();
 	return { success: true, parts };
 
 	function getDifference(a: number, b: number) {
