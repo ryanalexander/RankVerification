@@ -139,9 +139,6 @@ export default async function resolveTag(img: Buffer) {
 		}
 	}
 
-	const name = `./tmp/filtered-${new Date().getTime()}.png`;
-	fs.writeFileSync(name, filteredCanvas.toBuffer());
-
 	const {
 		data: { text }
 	} = await Tesseract.recognize(filteredCanvas.toDataURL(), 'eng');
