@@ -191,7 +191,21 @@ export default class VerificationManager {
 					return;
 				}
 
-				const valorantUsername = await resolveTag(image);
+				void message.channel
+					.send({
+						content: `Hey ${message.author.toString()}! \nWe are now processing your verification, this may take a few hours :)`
+					})
+					.then((message) => {
+						setTimeout(() => message.delete().catch(console.log), 10000);
+					});
+
+				let valorantUsername;
+
+				try {
+					valorantUsername = await resolveTag(image);
+				} catch (_e) {
+					valorantUsername = { success: false, error: 'Unable to parse image' };
+				}
 
 				const currentRank = message.member.roles.cache.find((role) => guild.ranknames.includes(role.name));
 
@@ -202,10 +216,10 @@ export default class VerificationManager {
 				});
 				embed.setDescription(`${message.author.tag} has requested verification.`);
 				embed.addField('Mention', message.author.toString(), true);
-				embed.addField('Username', valorantUsername.parts?.join('#') ?? 'Unknown', true);
+				if (valorantUsername) embed.addField('Username', valorantUsername!.parts?.join('#') ?? 'Unknown', true);
 				if (currentRank) embed.addField('Current Rank', currentRank.toString(), true);
 				embed.setColor(BrandColors.Primary);
-				embed.setFooter({ text: message.author.id });
+				embed.setFooter({ text: `${message.author.id} ${valorantUsername.error}` });
 				embed.setTimestamp(new Date());
 
 				const quickDenyRow = new MessageActionRow();
@@ -245,14 +259,6 @@ export default class VerificationManager {
 				embed.setImage('attachment://verify.png');
 
 				await targetChannel.send({ embeds: [embed], components: [quickDenyRow, rankVerifyRow], files: [attachment] });
-
-				void message.channel
-					.send({
-						content: `Hey ${message.author.toString()}! \nWe are now processing your verification, this may take a few hours :)`
-					})
-					.then((message) => {
-						setTimeout(() => message.delete().catch(console.log), 10000);
-					});
 			} else {
 				void message.author
 					.createDM()
