@@ -113,6 +113,9 @@ export default class VerificationManager {
 			})
 		).json();
 
+		if (account.status === 429)
+			return { success: false, message: 'Looks like I am having trouble fetching this account. This is a temporary error!' };
+
 		account = account.data;
 
 		if (!account) return { success: false, message: 'No account found' };

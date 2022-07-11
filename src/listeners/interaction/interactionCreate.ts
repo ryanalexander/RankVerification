@@ -134,7 +134,7 @@ export default class UserListener extends Listener {
 				const target = await client.guilds.cache.get(guild.id)!.members.fetch(verifyMessage.embeds[0].footer!.text.split(' ')[0]);
 
 				if (!target) {
-					await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
+					await interaction.editReply({ content: 'Looks like they left the Discord :(' });
 					void verifyMessage.delete().catch(console.log);
 					return;
 				}
