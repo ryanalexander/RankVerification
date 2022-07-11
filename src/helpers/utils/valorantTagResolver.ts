@@ -1,6 +1,5 @@
 import { createCanvas, loadImage } from 'canvas';
 import Tesseract from 'tesseract.js';
-import { default as fs } from 'fs';
 
 export default async function resolveTag(img: Buffer) {
 	const image = await loadImage(img);
