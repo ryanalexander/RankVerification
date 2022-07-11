@@ -23,7 +23,7 @@ export default class UserListener extends Listener {
 				if (guild) {
 					// Most likely a response to a verification request
 					const logChannel = (await client.guilds.cache.get(guild.id)!.channels.fetch(guild.verify_log_public)) as unknown as ThreadChannel;
-					const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text);
+					const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text.split(' ')[0]);
 
 					if (!target) {
 						await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
@@ -63,7 +63,7 @@ export default class UserListener extends Listener {
 			} else if (interaction.customId === 'rank' && interaction.values[0] !== 'higher') {
 				const guild: GuildConfig | undefined = client.config.guilds.find((g) => g.verify_queue === interaction.channel!.id);
 				if (!guild) return;
-				const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text);
+				const target = await client.guilds.cache.get(guild.id)!.members.fetch(interaction.message.embeds[0].footer!.text.split(' ')[0]);
 
 				if (!target) {
 					await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });
@@ -131,7 +131,7 @@ export default class UserListener extends Listener {
 					return;
 				}
 
-				const target = await client.guilds.cache.get(guild.id)!.members.fetch(verifyMessage.embeds[0].footer!.text);
+				const target = await client.guilds.cache.get(guild.id)!.members.fetch(verifyMessage.embeds[0].footer!.text.split(' ')[0]);
 
 				if (!target) {
 					await interaction.reply({ content: 'Looks like they left the Discord :(', ephemeral: true });

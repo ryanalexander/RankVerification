@@ -90,7 +90,7 @@ export default class VerificationManager {
 		const messages = await targetChannel.messages.fetch({ limit: 100 });
 		const message = messages
 			.filter((m) => m.embeds.length > 0 && m.embeds[0].footer !== null)
-			.filter((m) => m.embeds[0].footer!.text === member.user.id);
+			.filter((m) => m.embeds[0].footer!.text.split(' ')[0].split(' ')[0] === member.user.id);
 
 		return message.size > 0 ? message.first() : undefined;
 	}
