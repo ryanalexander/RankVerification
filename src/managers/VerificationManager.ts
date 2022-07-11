@@ -219,7 +219,7 @@ export default class VerificationManager {
 				if (valorantUsername) embed.addField('Username', valorantUsername!.parts?.join('#') ?? 'Unknown', true);
 				if (currentRank) embed.addField('Current Rank', currentRank.toString(), true);
 				embed.setColor(BrandColors.Primary);
-				embed.setFooter({ text: `${message.author.id} ${valorantUsername.error}` });
+				embed.setFooter({ text: `${message.author.id} ${valorantUsername.message}` });
 				embed.setTimestamp(new Date());
 
 				const quickDenyRow = new MessageActionRow();
