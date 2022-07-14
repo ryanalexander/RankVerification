@@ -28,9 +28,19 @@
                     "reply": "Please re-submit this screenshot with your in-game tag visible. (Hover over your name)"
                 },
                 {
+                    "id": "date_not_visible",
+                    "name": "No date",
+                    "reply": "Please resubmit this screenshot including the date in party chat."
+                },
+                {
                     "id": "no_rank",
                     "name": "No rank",
                     "reply": "Looks like you don't have a rank yet, feel free to submit again once you are ranked."
+                },
+                {
+                    "id": "screen_not_comp",
+                    "name": "Not Competitive",
+                    "reply": "Please re-submit this screenshot on the competitive queue screen!"
                 },
                 {
                     "id": "not_oce",
