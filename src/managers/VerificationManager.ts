@@ -285,6 +285,7 @@ export default class VerificationManager {
 								setTimeout(() => message.delete().catch(console.log), 5000);
 							});
 					});
+				void message.delete().catch(console.log);
 			}
 		}
 	}
