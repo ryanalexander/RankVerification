@@ -93,15 +93,14 @@ export default class UserListener extends Listener {
 				const usernameInput = new TextInputComponent()
 					.setCustomId('username')
 					.setLabel('Valorant Username')
-					.setPlaceholder(username === 'Unknown' ? '' : username.split('#')[0])
 					.setStyle('SHORT')
 					.setRequired(true);
-				const taglineInput = new TextInputComponent()
-					.setCustomId('tag')
-					.setLabel('Valorant Tagline')
-					.setPlaceholder(username === 'Unknown' ? '' : username.split('#')[1])
-					.setStyle('SHORT')
-					.setRequired(true);
+				const taglineInput = new TextInputComponent().setCustomId('tag').setLabel('Valorant Tagline').setStyle('SHORT').setRequired(true);
+
+				if (username !== 'Unknown') {
+					usernameInput.setValue(username === 'Unknown' ? '' : username.split('#')[0]);
+					taglineInput.setValue(username === 'Unknown' ? '' : username.split('#')[1]);
+				}
 
 				modal.addComponents(
 					new MessageActionRow<ModalActionRowComponent>().addComponents(usernameInput),
@@ -139,7 +138,7 @@ export default class UserListener extends Listener {
 					return;
 				}
 
-				const rank = account.data!.rank.current_data.currenttierpatched.split(' ')[0];
+				const rank = account.data!.rank.split(' ')[0];
 
 				if (!rank) {
 					void interaction.editReply({ content: `No role has been configured for rank ${rank}` });

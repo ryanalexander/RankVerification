@@ -12,13 +12,15 @@
 	},
 	"scripts": {
 		"build": "tsc -b src",
-		"dev": "yarn build && yarn start",
-		"start": "node dist/RankVerify.js",
+		"dev": "yarn build && yarn --max-old-space-size=8192 start",
+		"start": "node --max-old-space-size=8192 dist/RankVerify.js",
 		"lint": "eslint --fix --ext ts src",
 		"format": "prettier --write --loglevel=warn \"{src,tests}/**/*.{js,ts,json}\"",
 		"update": "yarn upgrade-interactive"
 	},
 	"dependencies": {
+		"@google-cloud/vision": "^2.4.2",
+		"@liamcottle/valorant.js": "^1.5.0",
 		"@sapphire/decorators": "^4.3.4",
 		"@sapphire/framework": "^3.0.0-next.210481a.0",
 		"axios": "^0.27.2",

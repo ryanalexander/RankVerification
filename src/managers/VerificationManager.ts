@@ -8,12 +8,19 @@ import axios from 'axios';
 import type VerificationResponse from '#helpers/interfaces/VerificationResponse';
 import type AccountAssociation from '#helpers/interfaces/AccountAssociation';
 import resolveTag from '#utils/valorantTagResolver';
+import { API as ValorantAPI } from '@liamcottle/valorant.js';
+import { Ranks } from '#utils/Rank';
 
 export default class VerificationManager {
 	private previouslyVerified: AccountAssociation[];
 
+	private valorantApi: any;
+
 	public constructor() {
 		this.previouslyVerified = JSON.parse(fs.readFileSync('./data/verifications.json').toString());
+
+		this.valorantApi = new ValorantAPI();
+		this.valorantApi.authorize('stelchworker', '8uIM&qVaTUEBek5hO0N%2x@gVaeymk4S8ty');
 	}
 
 	public async verifyUser(
@@ -122,26 +129,11 @@ export default class VerificationManager {
 
 		if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
 
-		let rank = await (
-			await fetch(`https://api.henrikdev.xyz/valorant/v2/by-puuid/mmr/ap/${account.puuid}`, {
-				headers: {
-					accept: '*/*',
-					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
-					'cache-control': 'no-cache',
-					pragma: 'no-cache',
-					'sec-fetch-dest': 'empty',
-					'sec-fetch-mode': 'cors',
-					'sec-fetch-site': 'same-site',
-					'sec-gpc': '1',
-					'Referrer-Policy': 'strict-origin-when-cross-origin'
-				},
-				method: 'GET'
-			})
-		).json();
+		const rank = await this.valorantApi.getPlayerCompetitiveHistory(account.puuid, 0, 5);
 
-		rank = rank.data;
+		if (!rank) return { success: false, message: 'No MMR found' };
 
-		return { success: true, data: { account, rank } };
+		return { success: true, data: { account, rank: Ranks[rank.data.Matches[0].TierAfterUpdate] } };
 	}
 
 	public async handleVerificationMessage(message: Message) {

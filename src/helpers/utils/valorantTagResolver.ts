@@ -1,7 +1,15 @@
 import { createCanvas, loadImage } from 'canvas';
-import Tesseract from 'tesseract.js';
+
+import vision from '@google-cloud/vision';
 
 export default async function resolveTag(img: Buffer) {
+	const client = new vision.ImageAnnotatorClient({
+		credentials: {
+			private_key:
+				'-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC+7S/htSwjvDP6\nKvBArLlGAzLAVt/UIryw0RMAr79Ej/OoWj1g/lxB0Lwo10qZtloAe3wahd6R26mQ\nMYAMPzpYfisHN+2Iz37jdmDp2+XN2/6sCW/HjChD7YZ1YPuZRsDjDdbbSPqNkHvR\niavrinQw/3zXoLqEPbhfkcdfQMsPPIxsbQ3pQo29cMItrvBtCr3tvkUycC8e0QkI\nwlbzLe6jMw0thg+pnN0jJml9PDB7xXe0sI8E7d5iJXhgExHL7dGnsmZvRvYmmh33\nKsviveY5wSXwC4PUfuGE34I0McqAy9UmSV6BGubIq3TGgxwyROACBF3CpY1+LNBe\n3JsvSP7nAgMBAAECggEAMXtVUoDa3LQVIHvqYkihh9SiXZjmT5tlHcpBy4bA4msQ\ncgxZJf8mN+R6L3eEnQvWjZNzWYhiY5jzfCxoDESCwZaJXkiPZkqojxkKCvHzwAOJ\nIFsdvjDD6r7vfxJQgqwEp5PZoGFsli3g+TBd/yCV9nDwkQ3V6Rn548LrUfN/7QWH\ntwuF2dSNrj+Neo7ZhbVQ1KmVHQndn3iZw/AiL6d+gu9Yc3oBPxrcZbgfNa0tKluM\nINb9PkcnHgfqWVqSrIoOtdAxcYsIPRpsxctacjVgZICXbNzIUVHCcMEDlno47JQJ\npoS4pUIaqBIXue9FRskCaA5UcqaErD5ggS5iIT85wQKBgQD67/JhZG3j0LuG6ZHo\nB0yurVJY5zPmCjQtnNvjJEhQMv7IuEyLYmio/hQLxQHOfaRVWYlooeRp/7QyBG8V\n2xI7HXAIAeS8qldQ9xKaYbdqceXLJgj3gMiHUj6UJb0sj0nPlLbnv5mh3rGqb1C5\nZF/KnRIiSChZm9YyQ78pd+rEhwKBgQDCx0srC0SYwq7ve1Us3RIjif9YyerAGZkl\nU7nd/pcHxVlHWrxv9ZJaBwKWLs9IXK5h//MigmGHuCRfAww80xwEghtQKG/HFgBs\nzokUd3ULJgcYVEsl2aCAWkbLIH/uGZXStPiPWpiluDYcsbwv64HcY/xO2LC6uRHz\n6w08qwDqoQKBgFhkHv+5bY/63aOHMNMHhzZcbQ5N2pUkcP7EKxxWknZVkDPJ34SV\nlII6hXsj2SAQV8uMr39Az4GbBbE8qJiNQ125X9YiPJ1Mb1dgwJfK5d3D4wrtCemM\n3pX0HYD3ziwdCQXqv4bgkdBX7kM31LqJJcjsDRAwVK5D2253OKX1zKePAoGAAhtv\n175edpyckeCusjaODK5ggdBlZsCgJIQ8XYd0kNP0vE3h/gAVHj43K/LDsU+3Xz4K\nnlP0xCgc1J5O0pWiFvZlXz+gvfGh/Ytadks4i+9UYlH/IiCxmNHhNC9c0vGZ6lak\n3cAoKJrOkw7lL0uH8x9tyliTyOFZrV7cnMxozSECgYBn2RDyZ2ivUETQ5CkYF4Wq\nT1LGel3y4w4QKMkzkl8zAecTcLDaUeAQUXObFSOYFFqYXB/ABaZjet3wKeFWid03\nMoO37mppmeOw0sF3tUlw0lqP4DEd3KZEnZChxWOLpheDesFY8SKIlGqCy5Am204N\nbjGd2QQQSslf5WKg9Gc3Tw==\n-----END PRIVATE KEY-----\n',
+			client_email: 'rankverification@stelch.iam.gserviceaccount.com'
+		}
+	});
 	const image = await loadImage(img);
 	let startingColour = [999, 999, 999];
 	let calibrationColour = [0, 0, 0];
@@ -138,6 +146,24 @@ export default async function resolveTag(img: Buffer) {
 		}
 	}
 
+	const parts = (
+		await client.annotateImage({
+			image: {
+				content: filteredCanvas.toBuffer().toString('base64')
+			},
+			features: [{ type: 'TEXT_DETECTION' }]
+		})
+	)[0].fullTextAnnotation;
+
+	if (!parts || !parts.text) return { success: false, error: true, message: 'Initial scan found no text' };
+
+	console.log(`Result is ${parts.text}`);
+
+	const text = parts.text.split('\n')[0].split(' #');
+
+	return { success: true, parts: text };
+
+	/*
 	const {
 		data: { text }
 	} = await Tesseract.recognize(filteredCanvas.toDataURL(), 'eng');
@@ -145,7 +171,9 @@ export default async function resolveTag(img: Buffer) {
 	if (parts.length < 2) {
 		return { success: false, error: true, message: 'Final call returned no results' };
 	}
+	
 	return { success: true, parts };
+	*/
 
 	function getDifference(a: number, b: number) {
 		return Math.abs(a - b);

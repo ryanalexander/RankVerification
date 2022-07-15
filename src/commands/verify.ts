@@ -43,7 +43,7 @@ export class UserCommand extends Command {
 			return;
 		}
 
-		const rank = account.data!.rank.current_data.currenttierpatched.split(' ')[0];
+		const rank = account.data!.rank.split(' ')[0];
 
 		if (!rank) {
 			void interaction.editReply({ content: `No role has been configured for rank ${rank}` });
