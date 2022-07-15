@@ -1,3 +1,6 @@
+# Production data directories
+data/
+
 # Temp/Working directories
 tmp/
 
