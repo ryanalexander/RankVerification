@@ -21,6 +21,9 @@ export default class VerificationManager {
 
 		this.valorantApi = new ValorantAPI();
 		this.valorantApi.authorize('stelchworker', '8uIM&qVaTUEBek5hO0N%2x@gVaeymk4S8ty');
+		setInterval(() => {
+			this.valorantApi.authorize('stelchworker', '8uIM&qVaTUEBek5hO0N%2x@gVaeymk4S8ty');
+		}, 1000 * 60 * 60);
 	}
 
 	public async verifyUser(
