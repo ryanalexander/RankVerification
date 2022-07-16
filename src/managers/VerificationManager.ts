@@ -107,18 +107,21 @@ export default class VerificationManager {
 
 	public async lookupUser(username: string, tagline: string) {
 		let account = await (
-			await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}?force=false`, {
-				headers: {
-					accept: '*/*',
-					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
-					'sec-fetch-dest': 'empty',
-					'sec-fetch-mode': 'cors',
-					'sec-fetch-site': 'same-site',
-					'sec-gpc': '1',
-					'Referrer-Policy': 'strict-origin-when-cross-origin'
-				},
-				method: 'GET'
-			})
+			await fetch(
+				`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}?force=false&key=HDEV-25bb565c-3a0f-45e0-b343-83e9a7cd0565`,
+				{
+					headers: {
+						accept: '*/*',
+						'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
+						'sec-fetch-dest': 'empty',
+						'sec-fetch-mode': 'cors',
+						'sec-fetch-site': 'same-site',
+						'sec-gpc': '1',
+						'Referrer-Policy': 'strict-origin-when-cross-origin'
+					},
+					method: 'GET'
+				}
+			)
 		).json();
 
 		if (account.status === 429)
