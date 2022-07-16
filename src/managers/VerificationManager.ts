@@ -107,12 +107,10 @@ export default class VerificationManager {
 
 	public async lookupUser(username: string, tagline: string) {
 		let account = await (
-			await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}`, {
+			await fetch(`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}?force=false`, {
 				headers: {
 					accept: '*/*',
 					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
-					'cache-control': 'no-cache',
-					pragma: 'no-cache',
 					'sec-fetch-dest': 'empty',
 					'sec-fetch-mode': 'cors',
 					'sec-fetch-site': 'same-site',
