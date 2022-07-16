@@ -8,7 +8,7 @@ import VerificationManager from '#root/managers/VerificationManager';
 
 // Master class for interacting with constants within the bot
 
-export default class CogClient extends SapphireClient {
+export default class VerifyClient extends SapphireClient {
 	@Enumerable(false)
 	public dev = process.env.NODE_ENV !== 'production';
 

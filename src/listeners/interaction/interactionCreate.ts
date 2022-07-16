@@ -114,7 +114,7 @@ export default class UserListener extends Listener {
 		if (interaction instanceof ModalSubmitInteraction) {
 			const modalInteraction: ModalSubmitInteraction = interaction;
 			if (modalInteraction.customId.startsWith('higher-')) {
-				await void modalInteraction.deferReply({ ephemeral: true });
+				await modalInteraction.deferReply({ ephemeral: true });
 				const verifyMessage = await (modalInteraction.guild!.channels.cache.get(modalInteraction.channelId!)! as TextChannel).messages.fetch(
 					modalInteraction.customId.split('-')[1]
 				);

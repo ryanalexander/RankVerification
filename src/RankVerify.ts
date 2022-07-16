@@ -1,8 +1,8 @@
 import { container } from '@sapphire/framework';
 import 'dotenv/config';
-import CogClient from './helpers/VerifyClient';
+import VerifyClient from './helpers/VerifyClient';
 
-export const client = new CogClient({
+export const client = new VerifyClient({
 	intents: ['GUILDS', 'GUILD_MESSAGES']
 });
 

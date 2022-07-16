@@ -132,11 +132,19 @@ export default class VerificationManager {
 
 		if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
 
-		const rank = await this.valorantApi.getPlayerCompetitiveHistory(account.puuid, 0, 5);
+		const { data } = await axios.get(
+			`https://pd.ap.a.pvp.net/mmr/v1/players/${account.puuid}/competitiveupdates?startIndex=0&endIndex=1&queue=competitive`,
+			{
+				headers: this.valorantApi.generateRequestHeaders()
+			}
+		);
+		const rank = data;
 
 		if (!rank) return { success: false, message: 'No MMR found' };
 
-		return { success: true, data: { account, rank: Ranks[rank.data.Matches[0].TierAfterUpdate] } };
+		if (!rank.Matches[0]) return { success: false, message: 'No recent enough matches to determine current rank' };
+
+		return { success: true, data: { account, rank: Ranks[rank.Matches[0].TierAfterUpdate] } };
 	}
 
 	public async handleVerificationMessage(message: Message) {

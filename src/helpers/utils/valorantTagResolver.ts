@@ -10,131 +10,198 @@ export default async function resolveTag(img: Buffer) {
 			client_email: 'rankverification@stelch.iam.gserviceaccount.com'
 		}
 	});
-	const image = await loadImage(img);
-	let startingColour = [999, 999, 999];
-	let calibrationColour = [0, 0, 0];
-	let hueChanged = false;
 
+	const targetColour = [28, 33, 39];
+
+	const image = await loadImage(img);
 	const canvas = createCanvas(image.width, image.height);
 	const ctx = canvas.getContext('2d');
 	ctx.drawImage(image, 0, 0);
 
-	let postY = 0;
+	// Calibration line either side of midpoint
+	let nameZoneBeginY = -1;
+	let nameZoneBeginX = -1;
 
-	let firstX = 0;
-	let firstY = 0;
+	// Rank Zone
+	let rankZoneLeft = -1;
+	let rankZoneRight = -1;
+	let rankZoneTopY = -1;
+	let rankZoneEndY = -1;
+	let rankZoneHeight = -1;
+	let rankZoneWidth = -1;
 
-	let lastX = 0;
-	let lastY = 0;
+	const pixOffset = image.height / image.width;
 
-	let stopSearch = false;
+	let minDiffR = Number.MAX_VALUE;
+	let minDiffG = Number.MAX_VALUE;
+	let minDiffB = Number.MAX_VALUE;
 
-	const sidebarPixel = ctx.getImageData(image.width - 2, image.height - 50, 1, 1).data;
+	let foundTop = false;
 
-	const sidebarOpen =
-		getDifference(sidebarPixel[0], 47) < getDifference(sidebarPixel[0], 69) &&
-		getDifference(sidebarPixel[1], 55) < getDifference(sidebarPixel[1], 79) &&
-		getDifference(sidebarPixel[2], 64) < getDifference(sidebarPixel[2], 89);
+	// Determine min diff
+	for (let i = 0; i < image.width; i++) {
+		const x = image.width - i;
+		const y = pixOffset * i;
 
-	if (sidebarOpen) {
-		const calibrationPixel = ctx.getImageData(image.width - 300, image.height / 8 + 5, 1, 1).data;
-		calibrationColour = [calibrationPixel[0], calibrationPixel[1], calibrationPixel[2]];
-	} else {
-		const calibrationPixel = ctx.getImageData(image.width - 100, image.height / 8 + 5, 1, 1).data;
-		calibrationColour = [calibrationPixel[0], calibrationPixel[1], calibrationPixel[2]];
+		const pixel = ctx.getImageData(x, y, 1, 1).data;
+
+		const r = pixel[0];
+		const g = pixel[1];
+		const b = pixel[2];
+
+		const rDiff = getDifference(r, targetColour[0]);
+		const gDiff = getDifference(g, targetColour[1]);
+		const bDiff = getDifference(b, targetColour[2]);
+
+		if (rDiff < minDiffR) minDiffR = rDiff;
+
+		if (gDiff < minDiffG) minDiffG = gDiff;
+
+		if (bDiff < minDiffB) minDiffB = bDiff;
 	}
-	for (let x = image.width / 2; x < image.width && !stopSearch; x++) {
-		for (let y = 0; y < image.height / 3 && !stopSearch; y++) {
-			const pixel = ctx.getImageData(x, y, 1, 1).data;
-			if (!hueChanged) {
+
+	// Find target
+	for (let i = 0; i < image.width; i++) {
+		const x = image.width - i;
+		const y = pixOffset * i;
+
+		const pixel = ctx.getImageData(x, y, 1, 1).data;
+
+		const r = pixel[0];
+		const g = pixel[1];
+		const b = pixel[2];
+
+		const rDiff = getDifference(r, targetColour[0]);
+		const gDiff = getDifference(g, targetColour[1]);
+		const bDiff = getDifference(b, targetColour[2]);
+
+		if (getDifference(rDiff, minDiffR) < 3 && getDifference(gDiff, minDiffG) < 3 && getDifference(bDiff, minDiffB) < 3) {
+			// Found start of bounding box
+
+			rankZoneRight = x;
+
+			let yOffset = 0;
+			let xOffset = 0;
+
+			// Find top
+			while (!foundTop) {
+				const px = ctx.getImageData(x - 1, y + yOffset, 1, 1).data;
+				if (!(px[0] === pixel[0] && px[1] === pixel[1] && px[2] === pixel[2])) {
+					foundTop = true;
+					rankZoneTopY = y + yOffset;
+
+					break;
+				}
+				yOffset--;
+			}
+			yOffset = 0;
+
+			// Find right
+			let startPixel = ctx.getImageData(x, rankZoneTopY, 1, 1).data;
+			while (x + xOffset < image.width) {
+				const posX = x + xOffset;
+				const posY = rankZoneTopY;
+
+				const pixel = ctx.getImageData(posX, posY, 1, 1).data;
 				if (
-					getDifference(pixel[0], calibrationColour[0]) < 1 &&
-					getDifference(pixel[1], calibrationColour[1]) < 1 &&
-					getDifference(pixel[2], calibrationColour[2]) < 1
+					!(
+						getDifference(pixel[0], startPixel[0]) > 3 ||
+						getDifference(pixel[1], startPixel[1]) > 3 ||
+						getDifference(pixel[2], startPixel[2]) > 3
+					)
 				) {
-					const calibrationValue = ctx.getImageData(x + 5, y - 30, 1, 1).data;
-					startingColour = [calibrationValue[0], calibrationValue[1], calibrationValue[2]];
-					hueChanged = true;
+					rankZoneRight = x + xOffset + 1;
 				}
+
+				xOffset++;
 			}
 
-			if (matchingRGB(pixel, [15, 25, 47]) && postY === 0) postY = y;
+			// Find bottom
+			startPixel = ctx.getImageData(rankZoneRight - 5, rankZoneTopY + 5, 1, 1).data;
+			while (rankZoneTopY + yOffset < image.height / 3) {
+				const posX = rankZoneRight - 5;
+				const posY = rankZoneTopY + yOffset + 5;
 
-			if (postY > 0 && y < postY) continue;
+				const pixel = ctx.getImageData(posX, posY, 1, 1).data;
 
-			if (
-				getDifference(pixel[0], startingColour[0]) < 2 &&
-				getDifference(pixel[1], startingColour[1]) < 2 &&
-				getDifference(pixel[2], startingColour[2]) < 2
-			) {
-				if (firstX === 0 && firstY === 0) {
-					firstX = x;
-					firstY = y;
-					lastX = x;
-					lastY = y;
+				if (
+					getDifference(pixel[0], startPixel[0]) > 3 ||
+					getDifference(pixel[1], startPixel[1]) > 3 ||
+					getDifference(pixel[2], startPixel[2]) > 3
+				) {
+					rankZoneEndY = posY;
+					break;
 				}
-				lastX = x;
-				lastY = y;
 
-				if (getDifference(y, lastY) > 50) {
-					stopSearch = true;
-				}
+				yOffset++;
 			}
+			yOffset = 0;
+
+			// Find left
+			startPixel = ctx.getImageData(rankZoneRight - 1, rankZoneTopY + 1, 1, 1).data;
+			while (rankZoneRight - 1 + xOffset > image.width / 2) {
+				const posX = rankZoneRight + xOffset;
+				const posY = rankZoneTopY + 1;
+
+				const pixel = ctx.getImageData(posX, posY, 1, 1).data;
+				if (
+					!(
+						getDifference(pixel[0], startPixel[0]) > 3 ||
+						getDifference(pixel[1], startPixel[1]) > 3 ||
+						getDifference(pixel[2], startPixel[2]) > 3
+					)
+				) {
+					rankZoneLeft = rankZoneRight + xOffset + 1;
+				}
+
+				xOffset--;
+			}
+
+			// Define name zone
+			nameZoneBeginX = rankZoneLeft;
+
+			break;
 		}
 	}
 
-	if (firstX === 0 || firstY === 0) {
-		return { success: false, error: true, message: 'Unable to locate starting point' };
-	}
-	if (lastX === 0 || lastY === 0) {
-		return { success: false, error: true, message: 'Unable to locate ending point' };
-	}
+	rankZoneHeight = rankZoneEndY - rankZoneTopY;
+	rankZoneWidth = rankZoneRight - rankZoneLeft;
 
-	if (firstX === lastX && firstY === lastY) {
-		return { success: false, error: true, message: 'Crop too small' };
+	// Check if size is too small
+	if (rankZoneHeight < 5 || rankZoneWidth < 5) {
+		return { error: true, message: 'final zone is too small' };
 	}
 
-	ctx.fillStyle = '#0388fc';
+	// Draw line from top right to bottom left
+	ctx.strokeStyle = '#00FFFF';
+	ctx.beginPath();
+	ctx.moveTo(0, image.width);
+	ctx.lineTo(image.height, 0);
+	ctx.stroke();
 
-	let boxHeight = lastY - firstY;
-	let boxWidth = lastX - firstX;
+	rankZoneHeight = rankZoneEndY - rankZoneTopY;
+	rankZoneWidth = rankZoneRight - rankZoneLeft;
 
-	boxHeight -= boxHeight / 3;
+	// Define name zone as rank zone minus height
+	nameZoneBeginY = rankZoneTopY - rankZoneHeight;
 
-	const tmpCanvas = createCanvas(boxWidth, boxHeight);
-	const tmpCtx = tmpCanvas.getContext('2d');
-	tmpCtx.drawImage(image, firstX, firstY, boxWidth, boxHeight, 0, 0, boxWidth, boxHeight);
+	nameZoneBeginX = rankZoneLeft;
 
-	let cutX = 0;
-	let firstColour = [0, 0, 0];
+	// Crop canvas to name zone
+	const nameZoneCanvas = createCanvas(rankZoneWidth, rankZoneHeight);
+	const nameZoneCtx = nameZoneCanvas.getContext('2d');
+	nameZoneCtx.drawImage(image, nameZoneBeginX, nameZoneBeginY, rankZoneWidth, rankZoneHeight, 0, 0, rankZoneWidth, rankZoneHeight);
 
-	for (let x = 5; x < boxWidth && cutX === 0; x++) {
-		const pixel = tmpCtx.getImageData(x, 5, 1, 1).data;
-
-		if (pixel[0] === 255 && pixel[1] === 255 && pixel[2] === 255) continue;
-
-		if (x === 5) {
-			firstColour = [pixel[0], pixel[1], pixel[2]];
-		} else {
-			const baseDifference =
-				getDifference(pixel[0], firstColour[0]) + getDifference(pixel[1], firstColour[1]) + getDifference(pixel[2], firstColour[2]);
-
-			if (baseDifference > 5) cutX = x;
-		}
-	}
-
-	if (cutX !== 0) boxWidth = cutX;
-
-	const filteredCanvas = createCanvas(boxWidth, boxHeight);
+	const filteredCanvas = createCanvas(rankZoneWidth, rankZoneHeight);
 	const filteredCtx = filteredCanvas.getContext('2d');
 
 	filteredCtx.fillStyle = '#ffffff';
-	filteredCtx.fillRect(0, 0, boxWidth, boxHeight);
+	filteredCtx.fillRect(0, 0, rankZoneWidth, rankZoneHeight);
 	filteredCtx.fillStyle = '#000000';
 
-	for (let x = 0; x < boxWidth; x++) {
-		for (let y = 0; y < boxHeight; y++) {
-			const pixel = tmpCtx.getImageData(x, y, 1, 1).data;
+	for (let x = 0; x < rankZoneWidth; x++) {
+		for (let y = 0; y < rankZoneWidth; y++) {
+			const pixel = nameZoneCtx.getImageData(x, y, 1, 1).data;
 			const fuzz = 35;
 			if (
 				(getDifference(pixel[0], 35) < fuzz && getDifference(pixel[1], 35) < fuzz && getDifference(pixel[2], 37) < fuzz) ||
@@ -157,11 +224,9 @@ export default async function resolveTag(img: Buffer) {
 
 	if (!parts || !parts.text) return { success: false, error: true, message: 'Initial scan found no text' };
 
-	console.log(`Result is ${parts.text}`);
-
 	const text = parts.text.split('\n')[0].split(' #');
 
-	return { success: true, parts: text };
+	return { success: true, parts: text.slice(0, 2) };
 
 	/*
 	const {
@@ -177,9 +242,5 @@ export default async function resolveTag(img: Buffer) {
 
 	function getDifference(a: number, b: number) {
 		return Math.abs(a - b);
-	}
-
-	function matchingRGB(first: any, second: any) {
-		return first[0] === second[0] && first[1] === second[1] && first[2] === second[2];
 	}
 }
