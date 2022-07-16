@@ -98,8 +98,8 @@ export default class UserListener extends Listener {
 				const taglineInput = new TextInputComponent().setCustomId('tag').setLabel('Valorant Tagline').setStyle('SHORT').setRequired(true);
 
 				if (username !== 'Unknown') {
-					usernameInput.setValue(username === 'Unknown' ? '' : username.split('#')[0]);
-					taglineInput.setValue(username === 'Unknown' ? '' : username.split('#')[1]);
+					usernameInput.setValue(username.split('#')[0] ?? ' ');
+					taglineInput.setValue(username.split('#')[1] ?? '');
 				}
 
 				modal.addComponents(
