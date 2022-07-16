@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   rankverify:
+    restart: always
     volumes:
       - /home/woodr/clients/ocegg/RankVerification/data:/usr/src/app/data
     build: .
