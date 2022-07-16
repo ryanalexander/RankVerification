@@ -1,7 +1,7 @@
 export const Ranks = [
-	'unranked',
-	'unranked',
-	'unranked',
+	'unranked (0)',
+	'unranked (1)',
+	'unranked (2)',
 	'Iron 1',
 	'Iron 2',
 	'Iron 3',
