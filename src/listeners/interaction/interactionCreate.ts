@@ -86,6 +86,24 @@ export default class UserListener extends Listener {
 				);
 
 				void interaction.message.delete().catch(console.log);
+			} else if (interaction.customId === 'rank' && interaction.values[0] === 'higher') {
+				const modal = new Modal().setCustomId(`higher-${interaction.message.id}`).setTitle('uwu rank me please');
+
+				const username = interaction.message.embeds[0].fields.find((field) => field.name === 'Username')!.value;
+
+				const usernameInput = new TextInputComponent()
+					.setCustomId('username')
+					.setLabel('Valorant Username and Tagline')
+					.setStyle('SHORT')
+					.setRequired(true);
+
+				if (username !== 'Unknown') {
+					usernameInput.setValue(`${username}`);
+				}
+
+				modal.addComponents(new MessageActionRow<ModalActionRowComponent>().addComponents(usernameInput));
+
+				void interaction.showModal(modal);
 			}
 		}
 
