@@ -76,9 +76,10 @@ export default class VerificationManager {
 		await targetChannel.send({ embeds: [embed], files: [attachment] });
 	}
 
-	public async logVerificationSuccess(member: GuildMember, rank: string, image: Buffer, staff: GuildMember) {
+	public async logVerificationSuccess(member: GuildMember, rank: Role, image: Buffer, staff: GuildMember) {
 		const guild: GuildConfig = client.config.guilds.find((g) => g.id === member.guild.id) as GuildConfig;
 		const targetChannel = (await client.channels.fetch(guild.verify_log)) as TextChannel;
+		const pubTargetChannel = (await client.channels.fetch(guild.verify_log_public)) as TextChannel;
 
 		const attachment = new MessageAttachment(image, 'verification.png');
 
@@ -90,6 +91,11 @@ export default class VerificationManager {
 			.addField('Verified by', `${staff.user}`)
 			.setImage('attachment://verification.png')
 			.setTimestamp();
+
+		await pubTargetChannel.send({
+			content: `:green_square: ${member.user} Hello! Your image has been accepted!\nYou have been given: ${rank}`,
+			allowedMentions: { parse: [] }
+		});
 
 		await targetChannel.send({ embeds: [embed], files: [attachment] });
 	}

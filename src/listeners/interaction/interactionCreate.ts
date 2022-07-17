@@ -79,7 +79,7 @@ export default class UserListener extends Listener {
 
 				void client.verificationManager.logVerificationSuccess(
 					target,
-					rank.name,
+					rank,
 					await VerificationManager.downloadImage(interaction.message.embeds[0].image!.url),
 					interaction.member
 				);
@@ -157,7 +157,7 @@ export default class UserListener extends Listener {
 
 				void client.verificationManager.logVerificationSuccess(
 					target,
-					rank,
+					response.role!,
 					await VerificationManager.downloadImage(verifyMessage.embeds[0].image!.url),
 					interaction.member
 				);
