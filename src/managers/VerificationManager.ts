@@ -113,21 +113,18 @@ export default class VerificationManager {
 
 	public async lookupUser(username: string, tagline: string) {
 		let account = await (
-			await fetch(
-				`https://api.henrikdev.xyz/valorant/v1/account/${username}/${tagline}?force=false&key=HDEV-25bb565c-3a0f-45e0-b343-83e9a7cd0565`,
-				{
-					headers: {
-						accept: '*/*',
-						'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
-						'sec-fetch-dest': 'empty',
-						'sec-fetch-mode': 'cors',
-						'sec-fetch-site': 'same-site',
-						'sec-gpc': '1',
-						'Referrer-Policy': 'strict-origin-when-cross-origin'
-					},
-					method: 'GET'
-				}
-			)
+			await fetch(`http://ext-ocegg.stelch.net:8081/valorant/users/${username}/${tagline}`, {
+				headers: {
+					accept: '*/*',
+					'accept-language': 'en-AU,en;q=0.9,en-US;q=0.8',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+					'sec-gpc': '1',
+					'Referrer-Policy': 'strict-origin-when-cross-origin'
+				},
+				method: 'GET'
+			})
 		).json();
 
 		if (account.status === 429)
@@ -137,7 +134,8 @@ export default class VerificationManager {
 
 		if (!account) return { success: false, message: 'No account found' };
 
-		if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
+		// Region check is deprecated
+		// if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
 
 		const { data } = await axios.get(
 			`https://pd.ap.a.pvp.net/mmr/v1/players/${account.puuid}/competitiveupdates?startIndex=0&endIndex=1&queue=competitive`,
