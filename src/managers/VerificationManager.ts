@@ -41,6 +41,7 @@ export default class VerificationManager {
 		rank: string,
 		account: VerificationResponse
 	): Promise<{ error?: string; message?: string; success?: boolean; role?: Role }> {
+		const guild: GuildConfig = client.config.guilds.find((g) => g.id === member.guild.id) as GuildConfig;
 		await member.guild.roles.fetch();
 		const role = member.guild.roles.cache.find((r) => r.name.toLowerCase() === rank.split(' ')[0].toLowerCase());
 
@@ -54,6 +55,12 @@ export default class VerificationManager {
 		}
 
 		if (role) {
+			if (guild.ranknames.map((name) => name.toLowerCase()).indexOf(role.name!.toLowerCase()) === -1) {
+				return {
+					error: 'invalid',
+					message: `The rank specified is not a valid rank for this server.`
+				};
+			}
 			await member.roles.add(role);
 			this.previouslyVerified.push({
 				discord_id: member.user.id,
