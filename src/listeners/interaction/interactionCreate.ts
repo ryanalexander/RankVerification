@@ -97,20 +97,15 @@ export default class UserListener extends Listener {
 
 				const usernameInput = new TextInputComponent()
 					.setCustomId('username')
-					.setLabel('Valorant Username')
+					.setLabel('Valorant Username and Tagline')
 					.setStyle('SHORT')
 					.setRequired(true);
-				const taglineInput = new TextInputComponent().setCustomId('tag').setLabel('Valorant Tagline').setStyle('SHORT').setRequired(true);
 
 				if (username !== 'Unknown') {
-					usernameInput.setValue(username.split('#')[0] ?? ' ');
-					taglineInput.setValue(username.split('#')[1] ?? '');
+					usernameInput.setValue(`${username}`);
 				}
 
-				modal.addComponents(
-					new MessageActionRow<ModalActionRowComponent>().addComponents(usernameInput),
-					new MessageActionRow<ModalActionRowComponent>().addComponents(taglineInput)
-				);
+				modal.addComponents(new MessageActionRow<ModalActionRowComponent>().addComponents(usernameInput));
 
 				void interaction.showModal(modal);
 			} else if (interaction.customId === 'manual') {
@@ -138,8 +133,14 @@ export default class UserListener extends Listener {
 				);
 				const guild: GuildConfig | undefined = client.config.guilds.find((g) => g.verify_queue === modalInteraction.channel!.id);
 				if (!guild) return;
-				const username = modalInteraction.fields.getTextInputValue('username');
-				const tag = modalInteraction.fields.getTextInputValue('tag');
+				const parts = modalInteraction.fields.getTextInputValue('username');
+				const username = parts.split('#')[0];
+				const tag = parts.split('#')[1] ?? '';
+
+				if (!username || !tag) {
+					await modalInteraction.reply({ content: 'Please enter a username and tagline!', ephemeral: true });
+					return;
+				}
 
 				// Validate account
 				const account = await client.verificationManager.lookupUser(username, tag);
