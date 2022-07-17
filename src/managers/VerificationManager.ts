@@ -240,7 +240,7 @@ export default class VerificationManager {
 					guild.quickdeny.map((q) => {
 						return {
 							label: q.name,
-							description: q.reply,
+							description: q.description,
 							value: q.id
 						};
 					})

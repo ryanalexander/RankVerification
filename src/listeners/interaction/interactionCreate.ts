@@ -34,11 +34,11 @@ export default class UserListener extends Listener {
 					const messages = guild.quickdeny.filter((q) => interaction.values.includes(q.id));
 					void interaction.message.delete().catch(console.log);
 
-					void logChannel.send({
-						content: `Hey ${target.user.toString()}! Your rank verify has been denied, see below for the reason: \n${messages
-							.map((message) => `- ${message.reply}`)
-							.join('\n')}`
-					});
+					void logChannel.send(
+						`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages.map(
+							(message) => `> ${message.reply}\n`
+						)}`
+					);
 
 					void client.verificationManager.logVerificationFailure(
 						target,
@@ -52,8 +52,8 @@ export default class UserListener extends Listener {
 							.createDM()
 							.then((dm) => {
 								dm.send(
-									`Your rank verify has been denied, see below for the reason: \n${messages.map(
-										(message) => `- ${message.reply}\n`
+									`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages.map(
+										(message) => `> ${message.reply}\n`
 									)}`
 								).catch();
 							})

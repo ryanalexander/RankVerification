@@ -13,6 +13,7 @@ export interface GuildConfig {
 export interface QuickDenyResponse {
 	id: string;
 	name: string;
+	description: string;
 	reply: string;
 }
 

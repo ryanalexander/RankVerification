@@ -10,42 +10,50 @@
                 {
                     "id": "general",
                     "name": "Denied",
-                    "reply": "Hmm... Something isn't right with this verification. Please try again later."
+                    "description": "For faked images, or general deny without a reason (e.g duplicate submissions or already has a rank)",
+                    "reply": "Denied (No reason provided)"
                 },
                 {
                     "id": "cropped",
                     "name": "Image cropped",
-                    "reply": "Your image appears to be cropped. Please resubmit a full-screen version"
+                    "description": "They have cropped their image (Must be showing their full valorant screen)",
+                    "reply": "Cropped your image"
                 },
                 {
                     "id": "screenshot",
                     "name": "Not screenshot",
-                    "reply": "Hey! You need to use the Windows screenshot tool (Win + PrtSc) and submit that to be accepted..."
+                    "description": "They haven't captured their image using Win + PrtSc (May be a video or photo of their monitor for example)",
+                    "reply": "Submitted a Photo, not a Screenshot (Win + PrtSc)"
                 },
                 {
                     "id": "tag_not_visible",
                     "name": "No tag (Platinum+)",
-                    "reply": "Please re-submit this screenshot with your in-game tag visible. (Hover over your name)"
+                    "description": "They are not hovering over their tag on the top right of their game. Only Plat+ requires this.",
+                    "reply": "Not hovering over your in-game tag (Top right)"
                 },
                 {
                     "id": "date_not_visible",
                     "name": "No date",
-                    "reply": "Please resubmit this screenshot including the date in party chat."
+                    "description": " They do not have today's date in party chat. All ranks require this.",
+                    "reply": "Missing date in party chat"
                 },
                 {
                     "id": "no_rank",
                     "name": "No rank",
-                    "reply": "Looks like you don't have a rank yet, feel free to submit again once you are ranked."
+                    "description": "They do not have a rank yet.",
+                    "reply": "Unranked"
                 },
                 {
                     "id": "screen_not_comp",
                     "name": "Not Competitive",
-                    "reply": "Please re-submit this screenshot on the competitive queue screen!"
+                    "description": "They are not on the competitive queue screen.",
+                    "reply": "Not on competitive queue screen"
                 },
                 {
                     "id": "not_oce",
                     "name": "Other region",
-                    "reply": "Hmm... I don't think you are from Oceania. Are you sure you are in the right place?"
+                    "description": "This account is not from OCE.",
+                    "reply": "Account is not from OCE"
                 }
             ],
             "ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
