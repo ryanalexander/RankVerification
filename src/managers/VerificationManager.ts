@@ -1,4 +1,14 @@
-import { GuildMember, Message, MessageActionRow, MessageAttachment, MessageEmbed, MessageSelectMenu, Role, TextChannel } from 'discord.js';
+import {
+	GuildMember,
+	Message,
+	MessageActionRow,
+	MessageAttachment,
+	MessageButton,
+	MessageEmbed,
+	MessageSelectMenu,
+	Role,
+	TextChannel
+} from 'discord.js';
 import type { GuildConfig } from '#helpers/interfaces/Config';
 import { BrandColors, Colors } from '#utils/constants';
 import { client } from '#root/RankVerify';
@@ -36,7 +46,7 @@ export default class VerificationManager {
 
 		const duplicate = this.previouslyVerified.find((verification) => verification.puuid === account.puuid);
 
-		if (duplicate && duplicate.discord_id !== member.user.id) {
+		if (duplicate && duplicate.discord_id !== member.user.id && account.puuid !== '') {
 			return {
 				error: 'duplicate',
 				message: `This account has already been used to verify for <@${duplicate.discord_id}>, unlink that account first!`
@@ -262,14 +272,23 @@ export default class VerificationManager {
 					}
 				]);
 
+				const retardedMilkyRow = new MessageActionRow();
+
+				const higherButton = new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank');
+				const manualButton = new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank');
+
+				retardedMilkyRow.addComponents(higherButton);
+				retardedMilkyRow.addComponents(manualButton);
+
 				quickDenyRow.addComponents(quickDeny);
+
 				rankVerifyRow.addComponents(rank);
 
 				const attachment = new MessageAttachment(image, 'verify.png');
 
 				embed.setImage('attachment://verify.png');
 
-				await targetChannel.send({ embeds: [embed], components: [quickDenyRow, rankVerifyRow], files: [attachment] });
+				await targetChannel.send({ embeds: [embed], components: [retardedMilkyRow, quickDenyRow, rankVerifyRow], files: [attachment] });
 			} else {
 				void message.author
 					.createDM()

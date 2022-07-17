@@ -85,7 +85,7 @@ export default class UserListener extends Listener {
 				);
 
 				void interaction.message.delete().catch(console.log);
-			} else if (interaction.customId === 'rank' && interaction.values[0] === 'higher') {
+			} else if ((interaction.customId === 'rank' && interaction.values[0] === 'higher') || interaction.customId === 'higher') {
 				const modal = new Modal().setCustomId(`higher-${interaction.message.id}`).setTitle('uwu rank me please');
 
 				const username = interaction.message.embeds[0].fields.find((field) => field.name === 'Username')!.value;
@@ -106,6 +106,19 @@ export default class UserListener extends Listener {
 					new MessageActionRow<ModalActionRowComponent>().addComponents(usernameInput),
 					new MessageActionRow<ModalActionRowComponent>().addComponents(taglineInput)
 				);
+
+				void interaction.showModal(modal);
+			} else if (interaction.customId === 'manual') {
+				if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+					void interaction.reply("Hey, You can't do that!");
+					return;
+				}
+
+				const modal = new Modal().setCustomId(`manual-${interaction.message.id}`).setTitle('Manually specify rank');
+
+				const rankInput = new TextInputComponent().setCustomId('rank').setLabel('Valorant Rank').setStyle('SHORT').setRequired(true);
+
+				modal.addComponents(new MessageActionRow<ModalActionRowComponent>().addComponents(rankInput));
 
 				void interaction.showModal(modal);
 			}
@@ -147,6 +160,43 @@ export default class UserListener extends Listener {
 
 				const response = await client.verificationManager.verifyUser(target, rank, {
 					puuid: account.data!.account.puuid,
+					rank
+				});
+
+				if (!response.success) {
+					void interaction.editReply({ content: response.message! });
+					return;
+				}
+
+				void client.verificationManager.logVerificationSuccess(
+					target,
+					response.role!,
+					await VerificationManager.downloadImage(verifyMessage.embeds[0].image!.url),
+					interaction.member
+				);
+
+				void interaction.editReply({ content: `${target.user.toString()} has been verified as ${response.role}` });
+				void verifyMessage.delete().catch(console.log);
+			} else if (modalInteraction.customId.startsWith('manual-')) {
+				await modalInteraction.deferReply({ ephemeral: true });
+				const verifyMessage = await (modalInteraction.guild!.channels.cache.get(modalInteraction.channelId!)! as TextChannel).messages.fetch(
+					modalInteraction.customId.split('-')[1]
+				);
+				const guild: GuildConfig | undefined = client.config.guilds.find((g) => g.verify_queue === modalInteraction.channel!.id);
+				if (!guild) return;
+
+				const target = await client.guilds.cache.get(guild.id)!.members.fetch(verifyMessage.embeds[0].footer!.text.split(' ')[0]);
+
+				if (!target) {
+					await interaction.editReply({ content: 'Looks like they left the Discord :(' });
+					void verifyMessage.delete().catch(console.log);
+					return;
+				}
+
+				const rank = modalInteraction.fields.getTextInputValue('rank');
+
+				const response = await client.verificationManager.verifyUser(target, rank, {
+					puuid: '',
 					rank
 				});
 
