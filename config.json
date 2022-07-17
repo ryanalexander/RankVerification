@@ -22,7 +22,7 @@
                 {
                     "id": "screenshot",
                     "name": "Not screenshot",
-                    "description": "They haven't captured their image using Win + PrtSc (May be a video or photo of their monitor for example)",
+                    "description": "They haven't captured their image using Win + PrtSc",
                     "reply": "Submitted a Photo, not a Screenshot (Win + PrtSc)"
                 },
                 {
