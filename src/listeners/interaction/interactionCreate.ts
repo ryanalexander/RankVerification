@@ -1,6 +1,7 @@
 import { Listener } from '@sapphire/framework';
 import type { GuildConfig } from '#helpers/interfaces/Config';
 import {
+	ButtonInteraction,
 	Interaction,
 	MessageActionRow,
 	Modal,
@@ -85,7 +86,11 @@ export default class UserListener extends Listener {
 				);
 
 				void interaction.message.delete().catch(console.log);
-			} else if ((interaction.customId === 'rank' && interaction.values[0] === 'higher') || interaction.customId === 'higher') {
+			}
+		}
+
+		if (interaction instanceof ButtonInteraction) {
+			if (interaction.customId === 'higher') {
 				const modal = new Modal().setCustomId(`higher-${interaction.message.id}`).setTitle('uwu rank me please');
 
 				const username = interaction.message.embeds[0].fields.find((field) => field.name === 'Username')!.value;
