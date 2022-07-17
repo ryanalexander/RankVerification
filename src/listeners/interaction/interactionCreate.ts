@@ -35,9 +35,9 @@ export default class UserListener extends Listener {
 					void interaction.message.delete().catch(console.log);
 
 					void logChannel.send(
-						`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages.map(
-							(message) => `> ${message.reply}\n`
-						)}`
+						`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages
+							.map((message) => ` > ${message.reply}`)
+							.join('\n')}`
 					);
 
 					void client.verificationManager.logVerificationFailure(
@@ -52,9 +52,9 @@ export default class UserListener extends Listener {
 							.createDM()
 							.then((dm) => {
 								dm.send(
-									`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages.map(
-										(message) => `> ${message.reply}\n`
-									)}`
+									`:red_square: ${target.user} Hello! Your verification was denied. Reason/s listed below: \n${messages
+										.map((message) => `> ${message.reply}\n`)
+										.join('\n')}`
 								).catch();
 							})
 							.catch();
