@@ -20,6 +20,7 @@ import type AccountAssociation from '#helpers/interfaces/AccountAssociation';
 import resolveTag from '#utils/valorantTagResolver';
 import { API as ValorantAPI } from '@liamcottle/valorant.js';
 import { Ranks } from '#utils/Rank';
+import { fetchImagesForMessage, sendMessageWithTTL } from '#utils/MessageUtils';
 
 export default class VerificationManager {
 	private previouslyVerified: AccountAssociation[];
@@ -144,8 +145,12 @@ export default class VerificationManager {
 			})
 		).json();
 
-		if (account.status === 429)
-			return { success: false, message: 'Looks like I am having trouble fetching this account. This is a temporary error!' };
+		if (account.success === false) {
+			return {
+				success: account.success,
+				message: `${account.error} - DV${account.code}`
+			};
+		}
 
 		account = account.data;
 
@@ -179,55 +184,38 @@ export default class VerificationManager {
 		if (guild) {
 			// Message was sent in verify channel
 
-			let imageUrl = '';
-
-			// Check if message contains an image, save as image
-			if (message.attachments.size > 0) {
-				const attachment = message.attachments.first();
-				if (attachment) {
-					const image = attachment.url;
-					if (image) imageUrl = image;
-				}
-			} else if (message.embeds.length > 0) {
-				const embed = message.embeds.find((embed) => embed.image && embed.image.url);
-				if (embed) {
-					const image = embed.image!.url;
-					if (image) imageUrl = image;
-				}
-			}
+			const imageUrl = fetchImagesForMessage(message)[0];
 
 			if (imageUrl) {
 				const image = await VerificationManager.downloadImage(imageUrl);
-
-				void message.delete().catch(console.log);
 				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
-				if (!message.member) return;
+				const existingVerification = await this.locateExistingVerification(message.member!);
+				const currentRank = message.member!.roles.cache.find((role) => guild.ranknames.includes(role.name));
+				let valorantUsername;
 
-				const existingVerification = await this.locateExistingVerification(message.member);
+				// Delete verification message as we have already cached details and saved image.
+				void message.delete().catch(console.log);
 
+				// Update existing verification is already exists
 				if (existingVerification) {
 					const attachment = new MessageAttachment(image, 'verify.png');
 					void existingVerification.edit({ files: [attachment] });
 
-					void message.channel
-						.send({
-							content: `Hey ${message.author.toString()}! \nI have updated your existing verification to show this new image!`
-						})
-						.then((message) => {
-							setTimeout(() => message.delete().catch(console.log), 5000);
-						});
+					sendMessageWithTTL(
+						{ content: `Hey ${message.author.toString()}! \nI have updated your existing verification to show this new image!` },
+						targetChannel,
+						5000
+					);
 					return;
 				}
 
-				void message.channel
-					.send({
+				sendMessageWithTTL(
+					{
 						content: `Hey ${message.author.toString()}! \nWe are now processing your verification, this may take a few hours :)`
-					})
-					.then((message) => {
-						setTimeout(() => message.delete().catch(console.log), 10000);
-					});
-
-				let valorantUsername;
+					},
+					message.channel as TextChannel,
+					10000
+				);
 
 				try {
 					valorantUsername = await resolveTag(image);
@@ -235,90 +223,78 @@ export default class VerificationManager {
 					valorantUsername = { success: false, error: 'Unable to parse image' };
 				}
 
-				const currentRank = message.member.roles.cache.find((role) => guild.ranknames.includes(role.name));
-
+				// Build verification message embed
 				const embed = new MessageEmbed();
-				embed.setAuthor({
-					name: `Rank Verification`,
-					iconURL: 'https://uploads-ssl.webflow.com/5f7627b1060dac86739e4d54/60984bf8bc5031de9f22b50e_Main_Wordmark.png'
-				});
-				embed.setDescription(`${message.author.tag} has requested verification.`);
-				embed.addField('Mention', message.author.toString(), true);
+				embed
+					.setAuthor({
+						name: `Rank Verification`,
+						iconURL: 'https://uploads-ssl.webflow.com/5f7627b1060dac86739e4d54/60984bf8bc5031de9f22b50e_Main_Wordmark.png'
+					})
+					.setDescription(`${message.author.tag} has requested verification.`)
+					.addField('Mention', message.author.toString(), true)
+					.setFooter({ text: `${message.author.id} ${valorantUsername.message}` })
+					.setTimestamp(new Date())
+					.setColor(BrandColors.Primary);
+
 				if (valorantUsername) embed.addField('Username', valorantUsername!.parts?.join('#') ?? 'Unknown', true);
 				if (currentRank) embed.addField('Current Rank', currentRank.toString(), true);
-				embed.setColor(BrandColors.Primary);
-				embed.setFooter({ text: `${message.author.id} ${valorantUsername.message}` });
-				embed.setTimestamp(new Date());
 
-				const quickDenyRow = new MessageActionRow();
-				const quickDeny = new MessageSelectMenu()
-					.setCustomId('quickDeny')
-					.setPlaceholder('Chose a quick deny reason')
-					.setMinValues(1)
-					.setMaxValues(guild.quickdeny.length);
+				// Define rows
+				const manualActionsRow = new MessageActionRow()
+					.addComponents(new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank'))
+					.addComponents(new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank'));
 
-				quickDeny.addOptions(
-					guild.quickdeny.map((q) => {
-						return {
-							label: q.name,
-							description: q.description,
-							value: q.id
-						};
-					})
+				const quickDenyRow = new MessageActionRow().addComponents(
+					new MessageSelectMenu()
+						.setCustomId('quickDeny')
+						.setPlaceholder('Chose a quick deny reason')
+						.setMinValues(1)
+						.setMaxValues(guild.quickdeny.length)
+						.addOptions(
+							guild.quickdeny.map((q) => {
+								return {
+									label: q.name,
+									description: q.description,
+									value: q.id
+								};
+							})
+						)
+				);
+				const rankVerifyRow = new MessageActionRow().addComponents(
+					new MessageSelectMenu()
+						.setCustomId('rank')
+						.setPlaceholder('Manually specify rank (Gold and below)')
+						.setMaxValues(1)
+						.addOptions([
+							...guild.ranknames.slice(0, guild.rankcap).map((r) => ({ label: r, value: r })),
+							{
+								label: 'Higher rank',
+								value: 'higher'
+							}
+						])
 				);
 
-				const rankVerifyRow = new MessageActionRow();
-				const rank = new MessageSelectMenu().setCustomId('rank').setPlaceholder('Manually specify rank (Gold and below)').setMaxValues(1);
-
-				rank.addOptions(guild.ranknames.slice(0, guild.rankcap).map((r) => ({ label: r, value: r })));
-
-				rank.addOptions([
-					{
-						label: 'Higher rank',
-						value: 'higher'
-					}
-				]);
-
-				const retardedMilkyRow = new MessageActionRow();
-
-				const higherButton = new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank');
-				const manualButton = new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank');
-
-				retardedMilkyRow.addComponents(higherButton);
-				retardedMilkyRow.addComponents(manualButton);
-
-				quickDenyRow.addComponents(quickDeny);
-
-				rankVerifyRow.addComponents(rank);
-
+				// Create attachment to be uploaded with message
 				const attachment = new MessageAttachment(image, 'verify.png');
-
 				embed.setImage('attachment://verify.png');
 
-				await targetChannel.send({ embeds: [embed], components: [retardedMilkyRow, quickDenyRow, rankVerifyRow], files: [attachment] });
+				await targetChannel.send({ embeds: [embed], components: [manualActionsRow, quickDenyRow, rankVerifyRow], files: [attachment] });
 			} else {
-				void message.author
-					.createDM()
-					.then((dm) => {
-						dm.send(`You must include an image in your message to verify.`).catch(() => {
-							void message.channel
-								.send({
-									content: `Hey ${message.author.toString()}, you must include an image in your message to verify.`
-								})
-								.then((message) => {
-									setTimeout(() => message.delete().catch(console.log), 5000);
-								});
-						});
-					})
-					.catch(() => {
-						void message.channel
-							.send({
-								content: `Hey ${message.author.toString()}, you must include an image in your message to verify.`
-							})
-							.then((message) => {
-								setTimeout(() => message.delete().catch(console.log), 5000);
-							});
-					});
+				try {
+					// Try DM member
+					const dmChannel = await message.author.createDM();
+					void dmChannel.send(`You must include an image in your message to verify.`);
+				} catch (_e) {
+					// Fallback to message channel if unable to DM
+					const logChannel = message.channel as TextChannel;
+					sendMessageWithTTL(
+						{
+							content: `You must include an image in your message to verify.`
+						},
+						logChannel,
+						5000
+					);
+				}
 				void message.delete().catch(console.log);
 			}
 		}
