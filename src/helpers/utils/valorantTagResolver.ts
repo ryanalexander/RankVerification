@@ -36,8 +36,6 @@ export default async function resolveTag(img: Buffer) {
 	let minDiffG = Number.MAX_VALUE;
 	let minDiffB = Number.MAX_VALUE;
 
-	let foundTop = false;
-
 	// Determine min diff
 	for (let i = 0; i < image.width; i++) {
 		const x = image.width - i;
@@ -84,20 +82,29 @@ export default async function resolveTag(img: Buffer) {
 			let xOffset = 0;
 
 			// Find top
-			while (!foundTop) {
-				const px = ctx.getImageData(x - 1, y + yOffset, 1, 1).data;
-				if (!(px[0] === pixel[0] && px[1] === pixel[1] && px[2] === pixel[2])) {
-					foundTop = true;
-					rankZoneTopY = y + yOffset;
+			let startPixel = ctx.getImageData(x - 1, y, 1, 1).data;
+			let zoneRankTopTmp = y;
+			while (y + yOffset > 0) {
+				const posX = x - 1;
+				const posY = y + yOffset;
 
-					break;
+				const pixel = ctx.getImageData(posX, posY, 1, 1).data;
+				if (
+					!(
+						getDifference(pixel[0], startPixel[0]) > 3 ||
+						getDifference(pixel[1], startPixel[1]) > 3 ||
+						getDifference(pixel[2], startPixel[2]) > 3
+					)
+				) {
+					zoneRankTopTmp = y + yOffset;
 				}
 				yOffset--;
 			}
+			rankZoneTopY = zoneRankTopTmp;
 			yOffset = 0;
 
 			// Find right
-			let startPixel = ctx.getImageData(x, rankZoneTopY, 1, 1).data;
+			startPixel = ctx.getImageData(x, rankZoneTopY, 1, 1).data;
 			while (x + xOffset < image.width) {
 				const posX = x + xOffset;
 				const posY = rankZoneTopY;
