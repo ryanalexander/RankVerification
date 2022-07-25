@@ -231,7 +231,10 @@ export default async function resolveTag(img: Buffer) {
 
 	if (!parts || !parts.text) return { success: false, error: true, message: 'Initial scan found no text' };
 
-	const text = parts.text.split('\n')[0].split(' #');
+	const text = parts.text
+		.split('\n')[0]
+		.split('#')
+		.map((t) => t.trim());
 
 	return { success: true, parts: text.slice(0, 2) };
 
