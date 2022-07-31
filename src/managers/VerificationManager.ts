@@ -188,6 +188,13 @@ export default class VerificationManager {
 				return;
 			}
 
+			if (message.member.id === '427364819205881856') {
+				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
+				void message.delete();
+				sendMessageWithTTL({ content: `Hey ${message.author.toString()}, fuck you.` }, targetChannel, 1000);
+				return;
+			}
+
 			const imageUrl = fetchImagesForMessage(message)[0];
 
 			if (imageUrl) {
