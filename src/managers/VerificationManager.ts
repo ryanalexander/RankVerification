@@ -183,13 +183,17 @@ export default class VerificationManager {
 
 		if (guild) {
 			// Message was sent in verify channel
+			if (!message.member) {
+				void message.delete();
+				return;
+			}
 
 			const imageUrl = fetchImagesForMessage(message)[0];
 
 			if (imageUrl) {
 				const image = await VerificationManager.downloadImage(imageUrl);
 				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
-				const existingVerification = await this.locateExistingVerification(message.member!);
+				const existingVerification = await this.locateExistingVerification(message.member);
 				const currentRank = message.member!.roles.cache.find((role) => guild.ranknames.includes(role.name));
 				let valorantUsername;
 
