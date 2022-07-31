@@ -191,7 +191,13 @@ export default class VerificationManager {
 			if (message.member.id === '427364819205881856') {
 				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
 				void message.delete();
-				sendMessageWithTTL({ content: `Hey ${message.author.toString()}, fuck you.` }, targetChannel, 1000);
+				sendMessageWithTTL(
+					{
+						content: `Hey ${message.author.toString()}, you are not worth the time to verify this. I am going to put your trash verification where it belongs... Nowhere`
+					},
+					targetChannel,
+					5000
+				);
 				return;
 			}
 
