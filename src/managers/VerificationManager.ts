@@ -189,13 +189,12 @@ export default class VerificationManager {
 			}
 
 			if (message.member.id === '427364819205881856') {
-				const targetChannel = (await client.channels.fetch(guild.verify_queue)) as TextChannel;
 				void message.delete();
 				sendMessageWithTTL(
 					{
 						content: `Hey ${message.author.toString()}, you are not worth the time to verify this. I am going to put your trash verification where it belongs... Nowhere`
 					},
-					targetChannel,
+					message.channel as TextChannel,
 					5000
 				);
 				return;
@@ -220,7 +219,7 @@ export default class VerificationManager {
 
 					sendMessageWithTTL(
 						{ content: `Hey ${message.author.toString()}! \nI have updated your existing verification to show this new image!` },
-						targetChannel,
+						message.channel as TextChannel,
 						5000
 					);
 					return;
