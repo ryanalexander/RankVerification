@@ -192,7 +192,7 @@ export default class VerificationManager {
 				void message.delete();
 				sendMessageWithTTL(
 					{
-						content: `Hey ${message.author.toString()}, you are not worth the time to verify this. I am going to put your trash verification where it belongs... Nowhere`
+						content: `Hey ${message.author.toString()}, you are currently restricted from rank verification. Please contact modmail for assistance!`
 					},
 					message.channel as TextChannel,
 					5000
