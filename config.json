@@ -1,63 +1,70 @@
 {
-    "guilds": [
-        {
-            "id": "537887361292304385",
-            "verify_target": "987664218809585674",
-            "verify_queue": "987683130808889454",
-            "verify_log": "818856612914790410",
-            "verify_log_public": "987679530745466890",
-            "quickdeny": [
-                {
-                    "id": "general",
-                    "name": "Denied",
-                    "description": "For faked images, or general deny without a reason (e.g duplicate submissions or already has a rank)",
-                    "reply": "Denied (No reason provided)"
-                },
-                {
-                    "id": "cropped",
-                    "name": "Image cropped",
-                    "description": "They have cropped their image (Must be showing their full valorant screen)",
-                    "reply": "Cropped your image"
-                },
-                {
-                    "id": "screenshot",
-                    "name": "Not screenshot",
-                    "description": "They haven't captured their image using Win + PrtSc",
-                    "reply": "Submitted a Photo, not a Screenshot (Win + PrtSc)"
-                },
-                {
-                    "id": "tag_not_visible",
-                    "name": "No tag (Platinum+)",
-                    "description": "They are not hovering over their tag on the top right of their game. Only Plat+ requires this.",
-                    "reply": "Not hovering over your in-game tag (Top right)"
-                },
-                {
-                    "id": "date_not_visible",
-                    "name": "No date",
-                    "description": " They do not have today's date in party chat. All ranks require this.",
-                    "reply": "Missing date in party chat"
-                },
-                {
-                    "id": "no_rank",
-                    "name": "No rank",
-                    "description": "They do not have a rank yet.",
-                    "reply": "Unranked"
-                },
-                {
-                    "id": "screen_not_comp",
-                    "name": "Not Competitive",
-                    "description": "They are not on the competitive queue screen.",
-                    "reply": "Not on competitive queue screen"
-                },
-                {
-                    "id": "not_oce",
-                    "name": "Other region",
-                    "description": "This account is not from OCE.",
-                    "reply": "Account is not from OCE"
-                }
-            ],
-            "ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
-            "rankcap": 4
-        }
-    ]
+	"guilds": [
+		{
+			"id": "537887361292304385",
+			"verify_target": "987664218809585674",
+			"verify_queue": "987683130808889454",
+			"verify_log": "818856612914790410",
+			"verify_log_public": "987679530745466890",
+			"support_roles": ["537911688490385419"],
+			"quickdeny": [
+				{
+					"id": "general",
+					"name": "Denied",
+					"description": "For faked images, or general deny without a reason (e.g duplicate submissions or already has a rank)",
+					"reply": "Denied (No reason provided)"
+				},
+				{
+					"id": "dumbdupe",
+					"name": "Already verified",
+					"description": "For members who are already verified the requested rank",
+					"reply": "You have already been verified"
+				},
+				{
+					"id": "cropped",
+					"name": "Image cropped",
+					"description": "They have cropped their image (Must be showing their full valorant screen)",
+					"reply": "Cropped your image"
+				},
+				{
+					"id": "screenshot",
+					"name": "Not screenshot",
+					"description": "They haven't captured their image using Win + PrtSc",
+					"reply": "Submitted a Photo, not a Screenshot (Win + PrtSc)"
+				},
+				{
+					"id": "tag_not_visible",
+					"name": "No tag (Platinum+)",
+					"description": "They are not hovering over their tag on the top right of their game. Only Plat+ requires this.",
+					"reply": "Not hovering over your in-game tag (Top right)"
+				},
+				{
+					"id": "date_not_visible",
+					"name": "No date",
+					"description": " They do not have today's date in party chat. All ranks require this.",
+					"reply": "Missing date in party chat"
+				},
+				{
+					"id": "no_rank",
+					"name": "No rank",
+					"description": "They do not have a rank yet.",
+					"reply": "Unranked"
+				},
+				{
+					"id": "screen_not_comp",
+					"name": "Not Competitive",
+					"description": "They are not on the competitive queue screen.",
+					"reply": "Not on competitive queue screen"
+				},
+				{
+					"id": "not_oce",
+					"name": "Other region",
+					"description": "This account is not from OCE.",
+					"reply": "Account is not from OCE"
+				}
+			],
+			"ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
+			"rankcap": 4
+		}
+	]
 }
