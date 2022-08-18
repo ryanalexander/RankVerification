@@ -127,7 +127,7 @@ export default class UserListener extends Listener {
 
 				void interaction.showModal(modal);
 			} else if (interaction.customId === 'manual') {
-				if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+				if (!interaction.member.permissions.has('MANAGE_CHANNELS')) {
 					void interaction.reply({ content: "Hey, You can't do that!", ephemeral: true });
 					return;
 				}
