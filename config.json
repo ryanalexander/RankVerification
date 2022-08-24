@@ -9,6 +9,12 @@
 			"support_roles": ["537911688490385419"],
 			"quickdeny": [
 				{
+					"id": "toohigh",
+					"name": "Too high",
+					"description": "For players attempting to verify above Platinum before open",
+					"reply": "Rank Verify is only open to Plat and below (Opens 31/08)"
+				},
+				{
 					"id": "general",
 					"name": "Denied",
 					"description": "For faked images, or general deny without a reason (e.g duplicate submissions or already has a rank)",

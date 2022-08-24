@@ -56,6 +56,11 @@ export default class VerificationManager {
 		}
 
 		if (role) {
+			if (guild.ranknames.map((name) => name.toLowerCase()).indexOf(role.name!.toLowerCase()) > 4)
+				return {
+					error: 'too-high',
+					message: `Daddy waspy said we can't verify ${role.toString()} right now. Maybe one day ;)`
+				};
 			if (guild.ranknames.map((name) => name.toLowerCase()).indexOf(role.name!.toLowerCase()) === -1) {
 				return {
 					error: 'invalid',
