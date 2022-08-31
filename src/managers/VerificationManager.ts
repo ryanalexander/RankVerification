@@ -56,11 +56,13 @@ export default class VerificationManager {
 		}
 
 		if (role) {
+			/*
 			if (guild.ranknames.map((name) => name.toLowerCase()).indexOf(role.name!.toLowerCase()) > 4)
 				return {
 					error: 'too-high',
 					message: `Daddy waspy said we can't verify ${role.toString()} right now. Maybe one day ;)`
 				};
+				*/
 			if (guild.ranknames.map((name) => name.toLowerCase()).indexOf(role.name!.toLowerCase()) === -1) {
 				return {
 					error: 'invalid',
@@ -135,7 +137,7 @@ export default class VerificationManager {
 	}
 
 	public async lookupUser(username: string, tagline: string) {
-		let account = await (
+		const account = await (
 			await fetch(`http://ext-ocegg.stelch.net:8081/valorant/users/${username}/${tagline}`, {
 				headers: {
 					accept: '*/*',
@@ -156,8 +158,6 @@ export default class VerificationManager {
 				message: `${account.error} - DV${account.code}`
 			};
 		}
-
-		account = account.data;
 
 		if (!account) return { success: false, message: 'No account found' };
 
@@ -263,7 +263,8 @@ export default class VerificationManager {
 				// Define rows
 				const manualActionsRow = new MessageActionRow()
 					.addComponents(new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank'))
-					.addComponents(new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank'));
+					.addComponents(new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank'))
+					.addComponents(new MessageButton().setCustomId('request').setStyle('DANGER').setLabel('Request username'));
 
 				const quickDenyRow = new MessageActionRow().addComponents(
 					new MessageSelectMenu()
@@ -271,15 +272,15 @@ export default class VerificationManager {
 						.setPlaceholder('Chose a quick deny reason')
 						.setMinValues(1)
 						.setMaxValues(guild.quickdeny.length)
-						.addOptions(
-							guild.quickdeny.map((q) => {
+						.addOptions([
+							...guild.quickdeny.map((q) => {
 								return {
 									label: q.name,
 									description: q.description,
 									value: q.id
 								};
 							})
-						)
+						])
 				);
 				const rankVerifyRow = new MessageActionRow().addComponents(
 					new MessageSelectMenu()
