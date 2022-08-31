@@ -137,7 +137,7 @@ export default class VerificationManager {
 	}
 
 	public async lookupUser(username: string, tagline: string) {
-		const account = await (
+		let account = await (
 			await fetch(`http://ext-ocegg.stelch.net:8081/valorant/users/${username}/${tagline}`, {
 				headers: {
 					accept: '*/*',
@@ -160,6 +160,8 @@ export default class VerificationManager {
 		}
 
 		if (!account) return { success: false, message: 'No account found' };
+
+		account = account.data;
 
 		if (!account.puuid) {
 			console.log(account);
