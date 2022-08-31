@@ -161,6 +161,11 @@ export default class VerificationManager {
 
 		if (!account) return { success: false, message: 'No account found' };
 
+		if (!account.puuid) {
+			console.log(account);
+			return { success: false, message: 'Failed to resolve player ID' };
+		}
+
 		// Region check is deprecated
 		// if (!account.region || account.region !== 'ap') return { success: false, message: 'Account not oce' };
 
