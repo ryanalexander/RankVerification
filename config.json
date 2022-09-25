@@ -1,12 +1,21 @@
 {
 	"guilds": [
 		{
-			"id": "537887361292304385",
-			"verify_target": "987664218809585674",
-			"verify_queue": "987683130808889454",
-			"verify_log": "818856612914790410",
-			"verify_log_public": "987679530745466890",
-			"support_roles": ["537911688490385419"],
+			"id": "707281625532334181",
+			"verify_target": "1020180751343431722",
+			"verify_queue": "1020188166709321738",
+			"verify_log": "1020188223944798218",
+			"verify_log_public": "1020181521895804949",
+			"support_roles": ["1020172804546633728"],
+			"modules": ["VALORANT"],
+			"modmail": {
+				"target": "974581534281584650",
+				"template": "({TARGET.USERNAME}) - ({TARGET.ID)",
+				"messages": [
+					"Hey 🙂\nHaving some issues determining your Valorant Username for your rank verification. Can you please send it here",
+					"! Modmail Staff\nVerification Link - [Click here](https://discord.com/channels/537887361292304385/987683130808889454/({MESSAGE.ID}))\nSubmitted by - ({USER.ID})"
+				]
+			},
 			"quickdeny": [
 				{
 					"id": "toohigh",
@@ -71,6 +80,67 @@
 			],
 			"ranknames": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
 			"rankcap": 4
+		},
+		{
+			"id": "1022766466266845204",
+			"verify_target": "1023153009179500554",
+			"verify_queue": "1023153263819886662",
+			"verify_log": "1023407379657785385",
+			"verify_log_public": "1023407734374285332",
+			"support_roles": ["1023141537237966878"],
+			"modules": [],
+			"quickdeny": [
+				{
+					"id": "general",
+					"name": "Denied",
+					"description": "For faked images, or general deny without a reason (e.g duplicate submissions or already has a rank)",
+					"reply": "Denied (No reason provided)"
+				},
+				{
+					"id": "dumbdupe",
+					"name": "Already verified",
+					"description": "For members who are already verified the requested rank",
+					"reply": "You have already been verified"
+				},
+				{
+					"id": "cropped",
+					"name": "Image cropped",
+					"description": "They have cropped their image (Must be showing their full valorant screen)",
+					"reply": "Cropped your image"
+				},
+				{
+					"id": "screenshot",
+					"name": "Not screenshot",
+					"description": "They haven't captured their image using Win + PrtSc",
+					"reply": "Submitted a Photo, not a Screenshot (Win + PrtSc)"
+				},
+				{
+					"id": "tag_not_visible",
+					"name": "No tag (Platinum+)",
+					"description": "They are not hovering over their tag on the top right of their game. Only Plat+ requires this.",
+					"reply": "Not hovering over your in-game tag (Top right)"
+				},
+				{
+					"id": "no_rank",
+					"name": "No rank",
+					"description": "They do not have a rank yet.",
+					"reply": "Unranked"
+				},
+				{
+					"id": "screen_not_comp",
+					"name": "Not Ranked",
+					"description": "They are not on the ranked queue screen.",
+					"reply": "Not on ranked queue screen"
+				},
+				{
+					"id": "not_oce",
+					"name": "Other region",
+					"description": "This account is not from OCE.",
+					"reply": "Account is not from OCE"
+				}
+			],
+			"ranknames": ["Copper", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Champion"],
+			"rankcap": 6
 		}
 	]
 }

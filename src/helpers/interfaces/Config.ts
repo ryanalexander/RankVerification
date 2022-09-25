@@ -5,6 +5,8 @@ export interface GuildConfig {
 	verify_log: string;
 	verify_log_public: string;
 
+	modules: string[];
+
 	quickdeny: QuickDenyResponse[];
 	ranknames: string[];
 	rankcap: number;

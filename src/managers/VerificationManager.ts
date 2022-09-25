@@ -268,10 +268,14 @@ export default class VerificationManager {
 				if (currentRank) embed.addField('Current Rank', currentRank.toString(), true);
 
 				// Define rows
-				const manualActionsRow = new MessageActionRow()
-					.addComponents(new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank'))
-					.addComponents(new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank'))
-					.addComponents(new MessageButton().setCustomId('request').setStyle('DANGER').setLabel('Request username'));
+				let manualActionsRow;
+
+				if (guild.modules.indexOf('VALORANT') > -1) {
+					manualActionsRow = new MessageActionRow()
+						.addComponents(new MessageButton().setCustomId('higher').setStyle('PRIMARY').setLabel('Higher rank'))
+						.addComponents(new MessageButton().setCustomId('manual').setStyle('SECONDARY').setLabel('Manual rank'))
+						.addComponents(new MessageButton().setCustomId('request').setStyle('DANGER').setLabel('Request username'));
+				}
 
 				const quickDenyRow = new MessageActionRow().addComponents(
 					new MessageSelectMenu()
@@ -307,7 +311,11 @@ export default class VerificationManager {
 				const attachment = new MessageAttachment(image, 'verify.png');
 				embed.setImage('attachment://verify.png');
 
-				await targetChannel.send({ embeds: [embed], components: [manualActionsRow, quickDenyRow, rankVerifyRow], files: [attachment] });
+				const components = [quickDenyRow, rankVerifyRow];
+
+				if (manualActionsRow) components.unshift(manualActionsRow);
+
+				await targetChannel.send({ embeds: [embed], components, files: [attachment] });
 			} else {
 				try {
 					// Try DM member
