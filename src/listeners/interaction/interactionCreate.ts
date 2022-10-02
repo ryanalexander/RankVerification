@@ -93,7 +93,7 @@ export default class UserListener extends Listener {
 
 				const usernameInput = new TextInputComponent()
 					.setCustomId('username')
-					.setLabel('Valorant Username and Tagline')
+					.setLabel('Username and Tagline')
 					.setStyle('SHORT')
 					.setRequired(true);
 
@@ -115,7 +115,7 @@ export default class UserListener extends Listener {
 
 				const usernameInput = new TextInputComponent()
 					.setCustomId('username')
-					.setLabel('Valorant Username and Tagline')
+					.setLabel('Username and Tagline')
 					.setStyle('SHORT')
 					.setRequired(true);
 
@@ -134,11 +134,13 @@ export default class UserListener extends Listener {
 
 				const modal = new Modal().setCustomId(`manual-${interaction.message.id}`).setTitle('Manually specify rank');
 
-				const rankInput = new TextInputComponent().setCustomId('rank').setLabel('Valorant Rank').setStyle('SHORT').setRequired(true);
+				const rankInput = new TextInputComponent().setCustomId('rank').setLabel('Rank').setStyle('SHORT').setRequired(true);
 
 				modal.addComponents(new MessageActionRow<ModalActionRowComponent>().addComponents(rankInput));
 
 				void interaction.showModal(modal);
+			} else if (interaction.customId === 'request') {
+				// Request username from modmail
 			}
 		}
 

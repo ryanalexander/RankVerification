@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String        @id @db.VarChar(19)
+  name    String
+  members GuildMember[]
+}
+
+model Guild {
+  id             String          @id @db.VarChar(19)
+  name           String
+  verifications  Verification[]
+  members        GuildMember[]
+  targetChannels TargetChannel[]
+  denyReasons    DenyReason[]
+  rankRoles      String[]
+}
+
+model GuildMember {
+  id                    String         @id @db.VarChar(19)
+  guildId               String
+  previousVerifications Verification[]
+  guild                 Guild          @relation(fields: [guildId], references: [id])
+  user                  User           @relation(fields: [id], references: [id])
+
+  @@unique(fields: [id, guildId], name: "guildMember")
+}
+
+model TargetChannel {
+  id          String   @id @db.VarChar(19)
+  guildId     String
+  channelType String
+  rankRoles   String[]
+  guild       Guild    @relation(fields: [guildId], references: [id])
+}
+
+model DenyReason {
+  id          String @id @db.VarChar(19)
+  guildId     String
+  name        String
+  description String
+  message     String
+  guild       Guild  @relation(fields: [guildId], references: [id])
+}
+
+model Verification {
+  id        String      @id @db.VarChar(19)
+  memberId  String
+  guildId   String
+  channel   String
+  image     String
+  createdAt DateTime
+  updatedAt DateTime
+  member    GuildMember @relation(fields: [memberId, guildId], references: [id, guildId])
+  guild     Guild       @relation(fields: [guildId], references: [id])
+
+  @@unique(fields: [id, guildId, memberId], name: "verification")
+}
