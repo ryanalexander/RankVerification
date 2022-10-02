@@ -18,7 +18,7 @@ import axios from 'axios';
 import type VerificationResponse from '#helpers/interfaces/VerificationResponse';
 import type AccountAssociation from '#helpers/interfaces/AccountAssociation';
 import resolveTag from '#utils/valorantTagResolver';
-import { API as ValorantAPI } from '#helpers/lib/ValorantJS';
+import { API as ValorantAPI } from '#helpers/lib/ValorantJS/index';
 import { Ranks } from '#utils/Rank';
 import { fetchImagesForMessage, sendMessageWithTTL } from '#utils/MessageUtils';
 

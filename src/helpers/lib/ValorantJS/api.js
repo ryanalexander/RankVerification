@@ -3,8 +3,6 @@
 const axios = require("axios").default;
 const { Agent } = require("https");
 
-const regions = require("./regions");
-
 // create https agent with expected ciphers to avoid 403 from cloudflare
 const agent = new Agent({
   ciphers: [
@@ -27,7 +25,7 @@ const parseTokensFromUrl = (uri) => {
 };
 
 class API {
-  constructor(region = regions.AsiaPacific) {
+  constructor(region = "AP") {
     this.region = region;
     this.username = null;
     this.user_id = null;
